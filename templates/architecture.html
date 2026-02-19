@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture | CyberShield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+    --beige-light: #F0EDE0;
+    --beige-main: #E0DCCF;
+    --beige-dark: #C4C0B3;
+    --beige-shadow: #A09C8F;
+    --screen-black: #1a1d21;
+    --crt-green: #4af626;
+    --accent-blue: #2B6CB0;
+    --ink-black: #0f0f0f;
+    --font-serif: 'EB Garamond', serif;
+    --font-mono: 'VT323', monospace;
+}
+
+@font-face {
+    font-family: 'RetroSerif';
+    src: local('Apple Garamond'), local('Garamond'), local('Times New Roman');
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: #f4f1e6;
+    font-family: 'RetroSerif', serif;
+    color: var(--ink-black);
+    min-height: 100vh;
+}
+
+/* === Floating Island Navbar === */
+.island-nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: rgba(228, 224, 212, 0.55);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(160, 156, 143, 0.45);
+    border-radius: 50px;
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.08),
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.island-nav .nav-brand {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: var(--ink-black);
+    padding: 6px 14px;
+    letter-spacing: 1px;
+    border-right: 1px solid rgba(160, 156, 143, 0.4);
+    margin-right: 4px;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.island-nav .nav-link {
+    position: relative;
+    font-family: 'RetroSerif', serif;
+    font-size: 1.05rem;
+    color: #555;
+    text-decoration: none;
+    padding: 7px 16px;
+    border-radius: 30px;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.island-nav .nav-link:hover {
+    background: rgba(15, 15, 15, 0.07);
+    color: var(--ink-black);
+}
+
+.island-nav .nav-link.active {
+    background: var(--ink-black);
+    color: #f4f1e6;
+}
+
+.island-nav .nav-link.cta-link {
+    background: var(--ink-black);
+    color: #f4f1e6;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    margin-left: 2px;
+}
+
+.island-nav .nav-link.cta-link:hover {
+    background: #333;
+    color: #fff;
+}
+
+/* === Page Header === */
+.page-header {
+    padding: 7rem 6% 3rem;
+    text-align: center;
+    border-bottom: 1px solid var(--beige-dark);
+}
+
+.page-header h1 {
+    font-size: 4.5rem;
+    font-weight: 400;
+    font-family: 'RetroSerif', serif;
+    margin-bottom: 1rem;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+
+.page-header p {
+    color: #666;
+    font-size: 1.25rem;
+    font-family: 'RetroSerif', serif;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.4;
+}
+
+/* === Architecture Diagram === */
+.architecture {
+    padding: 3.5rem 6%;
+    max-width: 900px;
+    margin: auto;
+}
+
+.arch-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.arch-box {
+    background: var(--beige-light);
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    min-width: 180px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.arch-box:hover {
+    border-color: var(--ink-black);
+    transform: translateY(-3px);
+    box-shadow: 3px 5px 0 var(--beige-shadow);
+}
+
+.arch-box.primary {
+    background: var(--ink-black);
+    color: #f4f1e6;
+    border-color: var(--ink-black);
+    box-shadow: 3px 3px 0 var(--beige-shadow);
+}
+
+.arch-box.primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 4px 6px 0 var(--beige-shadow);
+}
+
+.arch-box h3 {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.5px;
+}
+
+.arch-box p {
+    font-family: 'RetroSerif', serif;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.arch-box.primary p {
+    color: #bbb;
+}
+
+.arch-arrow {
+    text-align: center;
+    margin: 1rem 0;
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    color: var(--beige-shadow);
+    letter-spacing: 4px;
+}
+
+/* === Components Section === */
+.components {
+    padding: 3.5rem 6%;
+    border-top: 1px solid var(--beige-dark);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    font-weight: 400;
+    font-family: 'RetroSerif', serif;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+.section-header p {
+    color: #777;
+    font-size: 1.1rem;
+    font-family: 'RetroSerif', serif;
+}
+
+.comp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.comp-card {
+    background: var(--beige-light);
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.comp-card:hover {
+    border-color: var(--ink-black);
+    transform: translateY(-2px);
+    box-shadow: 3px 5px 0 var(--beige-shadow);
+}
+
+.comp-card h3 {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    color: var(--ink-black);
+}
+
+.comp-card p {
+    color: #666;
+    font-size: 1rem;
+    font-family: 'RetroSerif', serif;
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
+}
+
+.comp-card code {
+    display: block;
+    background: var(--screen-black);
+    color: var(--crt-green);
+    padding: 0.7rem 0.9rem;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* === Data Flow Section === */
+.data-flow {
+    padding: 3.5rem 6%;
+    max-width: 800px;
+    margin: auto;
+    border-top: 1px solid var(--beige-dark);
+}
+
+.flow-step {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    align-items: flex-start;
+}
+
+.flow-number {
+    width: 48px;
+    height: 48px;
+    background: var(--ink-black);
+    color: #f4f1e6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 2px 2px 0 var(--beige-shadow);
+}
+
+.flow-content h3 {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.5px;
+}
+
+.flow-content p {
+    color: #666;
+    font-size: 1rem;
+    font-family: 'RetroSerif', serif;
+    line-height: 1.5;
+}
+
+/* === Footer === */
+footer {
+    padding: 3rem 6%;
+    text-align: center;
+    border-top: 1px solid var(--beige-dark);
+    margin-top: 2rem;
+}
+
+footer p {
+    color: #999;
+    font-size: 0.95rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+}
+
+footer a {
+    color: var(--ink-black);
+    text-decoration: none;
+    border-bottom: 1px solid var(--beige-dark);
+    transition: border-color 0.2s;
+}
+
+footer a:hover {
+    border-color: var(--ink-black);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .page-header h1 { font-size: 3rem; }
+    .island-nav { top: 12px; padding: 8px 10px; gap: 2px; }
+    .island-nav .nav-brand { display: none; }
+    .island-nav .nav-link { font-size: 0.9rem; padding: 6px 10px; }
+    .flow-step { flex-direction: column; align-items: center; text-align: center; }
+    .arch-box { min-width: 140px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Floating Island Navbar -->
+<nav class="island-nav">
+    <a href="/" class="nav-brand">CYBERSHIELD</a>
+    <a href="/" class="nav-link">Home</a>
+    <a href="/features" class="nav-link">Features</a>
+    <a href="/architecture" class="nav-link active">Architecture</a>
+    <a href="/ethics" class="nav-link">Ethics</a>
+    <a href="/kid-shield" class="nav-link">Kid Shield</a>
+    <a href="/safe-compose" class="nav-link">Safe Compose</a>
+    <a href="/try" class="nav-link cta-link">Try It ▸</a>
+</nav>
+
+<div class="page-header">
+    <h1>System Architecture</h1>
+    <p>Multi-modal fusion combining text, image, and emoji encoders with cross-modal attention.</p>
+</div>
+
+<section class="architecture">
+    <div class="arch-row">
+        <div class="arch-box"><h3>INPUT TEXT</h3><p>Tweet content</p></div>
+        <div class="arch-box"><h3>INPUT IMAGE</h3><p>Media attachments</p></div>
+        <div class="arch-box"><h3>INPUT EMOJIS</h3><p>Extracted emojis</p></div>
+    </div>
+    <div class="arch-arrow">↓ ↓ ↓</div>
+    <div class="arch-row">
+        <div class="arch-box"><h3>DISTILBERT</h3><p>768-dim embedding</p></div>
+        <div class="arch-box"><h3>RESNET-18</h3><p>512-dim features</p></div>
+        <div class="arch-box"><h3>EMOJI EMBED</h3><p>64-dim vector</p></div>
+    </div>
+    <div class="arch-arrow">↓ ↓ ↓</div>
+    <div class="arch-row">
+        <div class="arch-box primary"><h3>FUSION LAYER</h3><p>1344 → 768 projection</p></div>
+    </div>
+    <div class="arch-arrow">↓</div>
+    <div class="arch-row">
+        <div class="arch-box primary"><h3>ADAPTER LAYER</h3><p>768 → 64 → 768 residual</p></div>
+    </div>
+    <div class="arch-arrow">↓</div>
+    <div class="arch-row">
+        <div class="arch-box primary"><h3>CROSS-MODAL TRANSFORMER</h3><p>1-layer, 8 heads</p></div>
+    </div>
+    <div class="arch-arrow">↓</div>
+    <div class="arch-row">
+        <div class="arch-box"><h3>CLASSIFICATION</h3><p>6-class output</p></div>
+        <div class="arch-box"><h3>SEVERITY HEAD</h3><p>0–1 score</p></div>
+    </div>
+</section>
+
+<section class="components">
+    <div class="section-header">
+        <h2>Key Components</h2>
+        <p>Building blocks of the detection system</p>
+    </div>
+    <div class="comp-grid">
+        <div class="comp-card">
+            <h3>TEXT BACKBONE</h3>
+            <p>DistilBERT CLS token representation.</p>
+            <code>AutoModel.from_pretrained('distilbert-base-uncased')</code>
+        </div>
+        <div class="comp-card">
+            <h3>IMAGE BACKBONE</h3>
+            <p>ResNet-18 feature extractor.</p>
+            <code>models.resnet18(weights=DEFAULT)</code>
+        </div>
+        <div class="comp-card">
+            <h3>EMOJI EMBEDDING</h3>
+            <p>Custom 64-dim learnable embeddings.</p>
+            <code>nn.Embedding(1000, 64)</code>
+        </div>
+        <div class="comp-card">
+            <h3>ADAPTER LAYER</h3>
+            <p>Parameter-efficient bottleneck module.</p>
+            <code>Down(768→64) → Up(64→768)</code>
+        </div>
+        <div class="comp-card">
+            <h3>CROSS-MODAL ENCODER</h3>
+            <p>Attention-based fusion layer.</p>
+            <code>TransformerEncoder(d_model=768)</code>
+        </div>
+        <div class="comp-card">
+            <h3>DUAL HEADS</h3>
+            <p>Classification + severity regression.</p>
+            <code>Linear(768,6) / Linear(768,1)</code>
+        </div>
+    </div>
+</section>
+
+<section class="data-flow">
+    <div class="section-header">
+        <h2>Detection Pipeline</h2>
+        <p>End-to-end inference process</p>
+    </div>
+
+    <div class="flow-step">
+        <div class="flow-number">1</div>
+        <div class="flow-content">
+            <h3>INPUT PROCESSING</h3>
+            <p>Tokenization, image transform 224×224, emoji extraction.</p>
+        </div>
+    </div>
+
+    <div class="flow-step">
+        <div class="flow-number">2</div>
+        <div class="flow-content">
+            <h3>PATTERN ANALYSIS</h3>
+            <p>Lexicon and regex based threat detection across 10 categories.</p>
+        </div>
+    </div>
+
+    <div class="flow-step">
+        <div class="flow-number">3</div>
+        <div class="flow-content">
+            <h3>NEURAL ENCODING</h3>
+            <p>Parallel text, image, emoji feature extraction.</p>
+        </div>
+    </div>
+
+    <div class="flow-step">
+        <div class="flow-number">4</div>
+        <div class="flow-content">
+            <h3>FUSION + ATTENTION</h3>
+            <p>Adapter projection and cross-modal reasoning.</p>
+        </div>
+    </div>
+
+    <div class="flow-step">
+        <div class="flow-number">5</div>
+        <div class="flow-content">
+            <h3>SEVERITY SCORING</h3>
+            <p>Zone classification with 0–100% output.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>CyberShield Research · 2024 | <a href="/ethics">Ethics & Transparency</a></p>
+</footer>
+
+</body>
+</html>

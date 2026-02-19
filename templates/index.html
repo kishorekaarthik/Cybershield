@@ -1,0 +1,928 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <style>
+        :root {
+            --beige-light: #F0EDE0;
+            --beige-main: #E0DCCF;
+            --beige-dark: #C4C0B3;
+            --beige-shadow: #A09C8F;
+            --screen-black: #1a1d21;
+            --screen-glow: #2a3d35;
+            --crt-green: #33ff00;
+            --accent-blue: #2B6CB0;
+            --accent-orange: #C05621;
+            --ink-black: #0f0f0f;
+            --font-serif: 'EB Garamond', serif;
+            --font-mono: 'VT323', monospace;
+            --shield-red: #D83335;
+        }
+
+        @font-face {
+            font-family: 'RetroSerif';
+            src: local('Apple Garamond'), local('Garamond'), local('Times New Roman');
+        }
+
+        @font-face {
+            font-family: 'RetroMono';
+            src: local('Courier New'), local('Courier'), monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f4f1e6;
+            font-family: 'RetroSerif', serif;
+            color: var(--ink-black);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-container {
+            position: relative;
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 1.1fr 1.2fr;
+            align-items: center;
+            padding: 4rem;
+        }
+
+        .content-col {
+            padding-right: 2rem;
+            z-index: 10;
+            padding-left: 2rem;
+        }
+
+        .product-col {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 2000px;
+            height: 100%;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 15rem;
+            line-height: 0.85;
+            margin: 0 0 2rem 0;
+            letter-spacing: -2px;
+            font-weight: 500;
+            font-family: 'RetroSerif', serif;
+        }
+
+        p.lead {
+            font-size: 1.35rem;
+            line-height: 1.3;
+            margin-bottom: 2rem;
+            max-width: 520px;
+            font-family: 'RetroSerif', serif;
+            letter-spacing: -0.3px;
+            color: #444;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--ink-black);
+            color: #f4f1e6;
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: 'RetroSerif', serif;
+            border: 2px solid var(--ink-black);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: transparent;
+            color: var(--ink-black);
+        }
+
+        .price-tag {
+            font-family: 'RetroMono', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .specs-grid {
+            margin-top: 3.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem 2rem;
+            max-width: 480px;
+        }
+
+        .spec-item h4 {
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.75rem;
+            color: #666;
+            font-family: var(--font-mono);
+        }
+
+        .spec-item p {
+            margin: 0.25rem 0 0 0;
+            font-family: 'RetroSerif', serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            line-height: 1.1;
+        }
+
+        
+        .scene {
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateY(-15deg) rotateX(5deg);
+            transition: transform 0.5s ease-out;
+        }
+
+        .product-col:hover .scene {
+            transform: rotateY(-5deg) rotateX(2deg);
+        }
+
+        .computer-unit {
+            position: relative;
+            width: 360px;
+            height: 440px;
+            transform-style: preserve-3d;
+        }
+
+        .face {
+            position: absolute;
+            background: var(--beige-main);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .front {
+            width: 360px;
+            height: 440px;
+            transform: translateZ(100px);
+            background: linear-gradient(135deg, var(--beige-light) 0%, var(--beige-main) 100%);
+            border-radius: 4px;
+            box-shadow: 
+                inset 2px 2px 5px rgba(255,255,255,0.8),
+                inset -5px -5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+        }
+
+        .back {
+            width: 360px;
+            height: 440px;
+            transform: translateZ(-100px) rotateY(180deg);
+            background: var(--beige-dark);
+        }
+
+        .left {
+            width: 200px;
+            height: 440px;
+            transform: rotateY(-90deg) translateZ(100px);
+            background: var(--beige-main);
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.05);
+        }
+
+        .right {
+            width: 200px;
+            height: 440px;
+            transform: rotateY(90deg) translateZ(260px);
+            background: var(--beige-dark);
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .top {
+            width: 360px;
+            height: 200px;
+            transform: rotateX(90deg) translateZ(100px);
+            background: var(--beige-light);
+        }
+
+        .bottom {
+            width: 360px;
+            height: 200px;
+            transform: rotateX(-90deg) translateZ(340px);
+            background: var(--beige-shadow);
+            box-shadow: 0 50px 80px rgba(0,0,0,0.3); 
+        }
+
+        
+        .screen-inset {
+            width: 280px;
+            height: 220px;
+            background: #D1CEC7;
+            border-radius: 16px;
+            box-shadow: 
+                inset 2px 2px 8px rgba(0,0,0,0.2),
+                inset -2px -2px 8px rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .crt {
+            width: 260px;
+            height: 200px;
+            background: var(--screen-black);
+            border-radius: 40% 40% 40% 40% / 10% 10% 10% 10%; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,1);
+        }
+
+        .crt::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            z-index: 5;
+            pointer-events: none;
+            border-radius: 12px;
+        }
+
+        .crt-glow {
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            background: transparent;
+            border-radius: 12px;
+            z-index: 2;
+            color: #4af626;
+            font-family: var(--font-mono);
+            padding: 8px;
+            font-size: 14px;
+            text-shadow: 0 0 4px rgba(74, 246, 38, 0.5);
+        }
+
+        
+        .floppy-slot {
+            width: 140px;
+            height: 12px;
+            background: #333;
+            border-radius: 6px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+            margin-left: 100px; 
+            position: relative;
+        }
+        
+        .logo-badge {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 24px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #222;
+            border-radius: 4px;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            color: #fff;
+            font-size: 16px;
+        }
+        .logo-badge::after {
+            content: "🛡️";
+            font-size: 16px;
+        }
+
+        
+        .sticker {
+            position: absolute;
+            z-index: 5;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            transform-style: flat;
+        }
+
+        .sticker-ball {
+            width: 40px;
+            height: 40px;
+            background: var(--shield-red);
+            border-radius: 50%;
+            bottom: 88px;
+            left: 20px;
+            background-image: 
+                radial-gradient(circle at 10px 10px, rgba(255,255,255,0.2) 2px, transparent 3px),
+                repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 10px);
+            transform: translateZ(101px) rotate(-10deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            font-family: var(--font-mono);
+        }
+        .sticker-ball::after {
+            content: "NOHATE";
+            font-size: 8px;
+        }
+
+        .sticker-star {
+            width: 45px;
+            height: 45px;
+            background: #fff;
+            border-radius: 4px;
+            bottom: 98px;
+            left: 55px;
+            transform: translateZ(102px) rotate(15deg);
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sticker-star::after {
+            content: '👁️';
+            font-size: 24px;
+        }
+        
+        .sticker-text {
+            width: 70px;
+            height: 34px;
+            background: #2B6CB0;
+            color: #fff;
+            font-family: 'Courier New', courier, monospace;
+            font-size: 6px;
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            bottom: 60px;
+            left: 95px;
+            transform: translateZ(101px) rotate(-4deg);
+            box-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
+        }
+
+        
+        .grill {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            width: 30px;
+            height: 20px;
+        }
+        .vent {
+            background: #333;
+            border-radius: 1px;
+            box-shadow: inset 1px 1px 1px rgba(0,0,0,0.5);
+        }
+
+        
+        .keyboard-assembly {
+            position: absolute;
+            width: 360px;
+            height: 140px;
+            bottom: -118px;
+            transform-style: preserve-3d;
+            transform-origin: top center;
+            --kb-angle: 66deg;
+            transform: translateZ(164px) rotateX(var(--kb-angle));
+            --kb-thickness: 18px;
+        }
+
+        .kb-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--beige-main);
+            border-radius: 4px;
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.5),
+                inset -5px -5px 15px rgba(0,0,0,0.1);
+            transform: translateZ(calc(var(--kb-thickness) / 2));
+            overflow: hidden;
+        }
+
+        .kb-front, .kb-back {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: var(--kb-thickness);
+        }
+
+        .kb-front {
+            bottom: 0;
+            background: linear-gradient(180deg, #cdc9bb 0%, #b5b1a3 100%);
+            transform-origin: bottom center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateX(90deg);
+        }
+
+        .kb-back {
+            top: 0;
+            background: linear-gradient(180deg, #e5e1d4 0%, #c9c5b8 100%);
+            transform-origin: top center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateX(-90deg);
+        }
+
+        .kb-left, .kb-right {
+            position: absolute;
+            top: 0;
+            width: var(--kb-thickness);
+            height: 100%;
+            background: linear-gradient(180deg, #d1cdbf 0%, #b7b3a6 100%);
+        }
+
+        .kb-left {
+            left: 0;
+            transform-origin: left center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateY(90deg);
+        }
+
+        .kb-right {
+            right: 0;
+            transform-origin: right center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateY(-90deg);
+        }
+
+        .kb-shadow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: transparent;
+            transform-origin: top center;
+            transform: rotateX(calc(-90deg - var(--kb-angle))) translateZ(20px);
+            box-shadow: 
+                0 40px 70px rgba(0,0,0,0.25),
+                0 20px 30px rgba(0,0,0,0.15);
+            pointer-events: none;
+            border-radius: 12px;
+        }
+
+        .keys-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 6px;
+            padding: 15px;
+            transform: translateZ(8px);
+            transform-style: preserve-3d;
+        }
+
+        .key {
+            height: 27px;
+            background: #ECE8DA;
+            border-radius: 4px;
+            box-shadow: 
+                0 6px 0 #C4C0B3,
+                0 8px 7px rgba(0,0,0,0.2);
+            transform: translateZ(1px);
+            transition: transform 0.05s;
+        }
+
+        .key.wide { grid-column: span 2; }
+        .key.space { grid-column: span 6; }
+
+        @keyframes typeKey {
+            0%, 100% { transform: translateZ(1px) translateY(0); box-shadow: 0 6px 0 #C4C0B3, 0 8px 7px rgba(0,0,0,0.2); }
+            50% { transform: translateZ(-2px) translateY(5px); box-shadow: 0 1px 0 #C4C0B3, 0 1px 2px rgba(0,0,0,0.05); }
+        }
+
+        .key:nth-child(3n+1) { animation: typeKey 1.5s infinite 0.2s; }
+        .key:nth-child(7n) { animation: typeKey 2.1s infinite 0.5s; }
+        .key:nth-child(2n+4) { animation: typeKey 1.8s infinite 0.9s; }
+        
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: #4af626;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        
+        .crt-ui {
+            display: flex;
+            height: 100%;
+            font-family: 'VT323', monospace;
+        }
+        .sidebar {
+            width: 25%;
+            border-right: 1px solid rgba(74, 246, 38, 0.3);
+            padding: 5px;
+            font-size: 12px;
+            color: #4af626;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .main-area {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .window {
+            background: rgba(0, 20, 0, 0.6);
+            border: 1px solid #4af626;
+            color: #4af626;
+            border-radius: 2px;
+            padding: 8px;
+            margin-top: 5px;
+            height: 100%;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .window-header {
+            border-bottom: 1px dashed #4af626;
+            margin-bottom: 5px;
+            padding-bottom: 2px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.7;
+        }
+        .sidebar-item.active {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .icon-square { width: 6px; height: 6px; border: 1px solid #4af626; }
+        .icon-square.filled { background: #4af626; }
+        
+        .typing-container {
+            font-family: 'VT323', monospace;
+            font-size: 13px;
+            line-height: 1.2;
+            color: #4af626;
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
+
+        .status-bar {
+            margin-top: auto;
+            border-top: 1px solid rgba(74, 246, 38, 0.3);
+            padding-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                height: auto;
+                padding: 2rem;
+                overflow-y: auto;
+            }
+            body {
+                height: auto;
+                overflow-y: auto;
+            }
+            .content-col {
+                padding: 0;
+                margin-bottom: 4rem;
+                text-align: center;
+            }
+            .cta-group {
+                justify-content: center;
+            }
+            .specs-grid {
+                margin: 3rem auto 0;
+                text-align: left;
+            }
+            .scene {
+                transform: scale(0.8) rotateY(-15deg) rotateX(5deg);
+                margin-bottom: 100px;
+            }
+        }
+
+        /* === Floating Island Navbar === */
+        .island-nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            background: rgba(228, 224, 212, 0.55);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid rgba(160, 156, 143, 0.45);
+            border-radius: 50px;
+            box-shadow:
+                0 4px 24px rgba(0, 0, 0, 0.08),
+                0 1px 3px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .island-nav .nav-brand {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            color: var(--ink-black);
+            padding: 6px 14px;
+            letter-spacing: 1px;
+            border-right: 1px solid rgba(160, 156, 143, 0.4);
+            margin-right: 4px;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .island-nav .nav-link {
+            position: relative;
+            font-family: 'RetroSerif', serif;
+            font-size: 1.05rem;
+            color: #555;
+            text-decoration: none;
+            padding: 7px 16px;
+            border-radius: 30px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .island-nav .nav-link:hover {
+            background: rgba(15, 15, 15, 0.07);
+            color: var(--ink-black);
+        }
+
+        .island-nav .nav-link.active {
+            background: var(--ink-black);
+            color: #f4f1e6;
+        }
+
+        .island-nav .nav-link.cta-link {
+            background: var(--ink-black);
+            color: #f4f1e6;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            margin-left: 2px;
+        }
+
+        .island-nav .nav-link.cta-link:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        @media (max-width: 1000px) {
+            .island-nav {
+                top: 12px;
+                padding: 8px 10px;
+                gap: 2px;
+            }
+            .island-nav .nav-brand {
+                display: none;
+            }
+            .island-nav .nav-link {
+                font-size: 0.9rem;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Island Navbar -->
+    <nav class="island-nav">
+        <a href="/" class="nav-brand">CYBERSHIELD</a>
+        <a href="/" class="nav-link active">Home</a>
+        <a href="/features" class="nav-link">Features</a>
+        <a href="/architecture" class="nav-link">Architecture</a>
+        <a href="/ethics" class="nav-link">Ethics</a>
+        <a href="/kid-shield" class="nav-link">Kid Shield</a>
+        <a href="/safe-compose" class="nav-link">Safe Compose</a>
+        <a href="/try" class="nav-link cta-link">Try It ▸</a>
+    </nav>
+
+    <div class="main-container">
+        
+        
+        <div class="content-col">
+            <h1>
+            
+               Cyber Shield
+            </h1>
+            <p class="lead">
+                Advanced protection for the modern social web. CyberShield combines cross-modal transformer fusion with real-time X integration to detect and filter abuse before it spreads. Operational transparency included.
+            </p>
+            
+            <div class="cta-group">
+                <a href="/try" class="btn">Deploy Shield</a>
+                <div class="price-tag">v2.4.0 STABLE</div>
+            </div>
+
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <h4>Architecture</h4>
+                    <p>Cross-Modal Fusion</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Training Data</h4>
+                    <p>MMHS150K Set</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Detection</h4>
+                    <p>10-Layer Engine</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Latency</h4>
+                    <p>GPU-Accelerated</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Anti-Evasion</h4>
+                    <p>Leetspeak Aware</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Risk Model</h4>
+                    <p>4-Tier Uncertainty</p>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="product-col">
+            <div class="scene" id="scene">
+                <div class="computer-unit">
+                    
+                    <div class="face front">
+                        <div class="screen-inset">
+                            <div class="crt">
+                                <div class="crt-glow">
+                                    <div class="crt-ui">
+                                        <div class="sidebar">
+                                            <div style="font-weight: bold; margin-bottom: 4px;">MENU</div>
+                                            <div class="sidebar-item active"><div class="icon-square filled"></div> MON</div>
+                                            <div class="sidebar-item"><div class="icon-square"></div> LOGS</div>
+                                            <div class="sidebar-item"><div class="icon-square"></div> CONF</div>
+                                            <div class="sidebar-item"><div class="icon-square"></div> API</div>
+                                            <div class="sidebar-item" style="margin-top:auto"><div class="icon-square"></div> EXIT</div>
+                                        </div>
+                                        <div class="main-area">
+                                            <div style="font-size: 10px; margin-bottom: 4px; opacity: 0.7; display:flex; justify-content:space-between;">
+                                                <span>SHIELD_OS v2.4</span>
+                                                <span>GPU: ON</span>
+                                            </div>
+                                            <div class="window">
+                                                <div class="window-header">
+                                                    <span>Live_Stream.log</span>
+                                                    <span>[x]</span>
+                                                </div>
+                                                <div class="typing-container"><span id="typewriter"></span><span class="cursor"></span></div>
+                                                <div class="status-bar">
+                                                    <span>PROTECTED</span>
+                                                    <span>LATENCY: 12ms</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="logo-badge"></div>
+                        <div class="floppy-slot"></div>
+                        
+                        
+                        <div class="sticker sticker-ball"></div>
+                        <div class="sticker sticker-star"></div>
+                        <div class="sticker sticker-text">
+                            <span>ANTI</span>
+                            <span>EVASION</span>
+                        </div>
+                        
+                        <div class="grill">
+                            <div class="vent"></div><div class="vent"></div><div class="vent"></div><div class="vent"></div>
+                            <div class="vent"></div><div class="vent"></div><div class="vent"></div><div class="vent"></div>
+                        </div>
+                    </div>
+                    <div class="face back"></div>
+                    <div class="face left"></div>
+                    <div class="face right"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                    
+                    
+                    <div class="keyboard-assembly">
+                        <div class="kb-base">
+                            <div class="keys-grid">
+                                
+                                <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+                                <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+                                <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+                                
+                                <div class="key wide"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+                                <div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+                                <div class="key"></div><div class="key wide"></div>
+                                
+                                <div class="key"></div><div class="key"></div><div class="key space"></div><div class="key"></div><div class="key"></div><div class="key"></div>
+                            </div>
+                        </div>
+                        <div class="kb-front"></div>
+                        <div class="kb-back"></div>
+                        <div class="kb-left"></div>
+                        <div class="kb-right"></div>
+                        <div class="kb-shadow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const textLines = [
+            "> Connecting to X API Stream...",
+            "> Connection established (Secure).",
+            "> Loading MMHS150K weights...",
+            "> Transformer Fusion Engine: READY",
+            "> --------------------------------",
+            "> Analyzing Tweet ID: 894392...",
+            "> Text: 'u r so stuuupid'",
+            "> Detecting evasion patterns...",
+            "> MATCH: Repeated Characters (Zone H)",
+            "> Context: Harassment / Personal Attack",
+            "> Risk Score: 82% [HIGH]",
+            "> Action: Auto-Restrict Account",
+            "> --------------------------------",
+            "> Listening for new events..."
+        ];
+        
+        const target = document.getElementById("typewriter");
+        let lineIndex = 0;
+        let charIndex = 0;
+        let currentText = "";
+        
+        function typeWriter() {
+            if (lineIndex < textLines.length) {
+                const line = textLines[lineIndex];
+                if (charIndex < line.length) {
+                    currentText += line.charAt(charIndex);
+                    target.innerHTML = currentText.replace(/\n/g, "<br>"); 
+                    charIndex++;
+                    setTimeout(typeWriter, 15 + Math.random() * 20); 
+                } else {
+                    currentText += "<br>";
+                    target.innerHTML = currentText;
+                    lineIndex++;
+                    charIndex = 0;
+                    setTimeout(typeWriter, 300); 
+                }
+            } else {
+                setTimeout(() => {
+                    currentText = "";
+                    target.innerHTML = "";
+                    lineIndex = 0;
+                    charIndex = 0;
+                    typeWriter();
+                }, 5000);
+            }
+        }
+
+        window.onload = typeWriter;
+    </script>
+
+</body>
+</html>

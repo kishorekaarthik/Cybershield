@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    width: 320px;
+    background: #f4f1e6;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #0f0f0f;
+    padding: 20px;
+}
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0dccf;
+}
+.shield-icon {
+    width: 36px; height: 36px;
+    background: #0f0f0f;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: #f4f1e6;
+    font-size: 18px;
+    font-weight: 800;
+}
+h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+.subtitle { font-size: 12px; color: #888; }
+
+.status {
+    background: #e8f5e9;
+    border: 1px solid #2d6a4f;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+    text-align: center;
+}
+.status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #2d6a4f;
+    margin-right: 6px;
+    animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+.status span { font-size: 13px; font-weight: 700; color: #2d6a4f; }
+
+.info { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 14px; }
+.info strong { color: #0f0f0f; }
+
+.feature-list { list-style: none; margin-bottom: 16px; }
+.feature-list li {
+    padding: 6px 0;
+    font-size: 12px;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.feature-list li::before {
+    content: '✓';
+    color: #2d6a4f;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.link-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background: #0f0f0f;
+    color: #f4f1e6;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: background 0.2s;
+}
+.link-btn:hover { background: #333; }
+
+.footer {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 10px;
+    color: #aaa;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="shield-icon">🛡️</div>
+        <div>
+            <h1>CyberShield</h1>
+            <div class="subtitle">Safe Compose Extension</div>
+        </div>
+    </div>
+
+    <div class="status">
+        <span class="status-dot"></span>
+        <span>Active on Twitter / X</span>
+    </div>
+
+    <p class="info">
+        CyberShield analyzes your tweets <strong>in real-time</strong> as you type. A toxicity meter appears below every compose box — helping you communicate without harassment.
+    </p>
+
+    <ul class="feature-list">
+        <li>Live toxicity scoring as you type</li>
+        <li>Word-level trigger detection</li>
+        <li>Empathy rewrite suggestions</li>
+        <li>Works on tweets, replies, and DMs</li>
+        <li>Powered by DistilBERT + ResNet-18</li>
+    </ul>
+
+    <a href="http://localhost:5000" class="link-btn" target="_blank">Open CyberShield Dashboard</a>
+
+    <div class="footer">
+        CyberShield Research Team · v1.0.0
+    </div>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kid Shield | CyberShield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+    --beige-light: #F0EDE0;
+    --beige-main: #E0DCCF;
+    --beige-dark: #C4C0B3;
+    --beige-shadow: #A09C8F;
+    --screen-black: #1a1d21;
+    --crt-green: #4af626;
+    --ink-black: #0f0f0f;
+    --font-serif: 'EB Garamond', serif;
+    --font-mono: 'VT323', monospace;
+    --zone-safe: #2d6a4f;
+    --zone-caution: #b08c1a;
+    --zone-risk: #9b2226;
+}
+@font-face { font-family: 'RetroSerif'; src: local('Apple Garamond'), local('Garamond'), local('Times New Roman'); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background-color: #f4f1e6; font-family: 'RetroSerif', serif; color: var(--ink-black); min-height: 100vh; line-height: 1.6; }
+
+/* Island Navbar */
+.island-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: rgba(228,224,212,0.55); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); border: 1px solid rgba(160,156,143,0.45); border-radius: 50px; box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5); }
+.island-nav .nav-brand { font-family: var(--font-mono); font-size: 1.1rem; color: var(--ink-black); padding: 6px 14px; letter-spacing: 1px; border-right: 1px solid rgba(160,156,143,0.4); margin-right: 4px; white-space: nowrap; text-decoration: none; }
+.island-nav .nav-link { font-family: 'RetroSerif', serif; font-size: 1.05rem; color: #555; text-decoration: none; padding: 7px 16px; border-radius: 30px; transition: all 0.25s ease; white-space: nowrap; }
+.island-nav .nav-link:hover { background: rgba(15,15,15,0.07); color: var(--ink-black); }
+.island-nav .nav-link.active { background: var(--ink-black); color: #f4f1e6; }
+.island-nav .nav-link.cta-link { background: var(--ink-black); color: #f4f1e6; font-family: var(--font-mono); font-size: 0.95rem; letter-spacing: 0.5px; margin-left: 2px; }
+.island-nav .nav-link.cta-link:hover { background: #333; color: #fff; }
+
+.main-layout { max-width: 900px; margin: 0 auto; padding: 6rem 2rem 3rem; }
+
+.page-header { text-align: center; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--beige-dark); }
+.page-header h1 { font-size: 4rem; font-weight: 400; font-family: 'RetroSerif', serif; margin-bottom: 0.8rem; letter-spacing: -2px; line-height: 1; }
+.page-header .subtitle { color: #666; font-size: 1.15rem; font-family: 'RetroSerif', serif; max-width: 600px; margin: 0 auto; line-height: 1.4; }
+
+.search-section { margin-bottom: 2rem; }
+.search-box { display: flex; gap: 12px; }
+.search-input { flex: 1; background: var(--beige-light); border: 2px solid var(--beige-dark); color: var(--ink-black); font-size: 1.1rem; font-family: var(--font-mono); outline: none; padding: 14px 18px; border-radius: 10px; letter-spacing: 0.5px; transition: all 0.3s; box-shadow: 2px 2px 0 var(--beige-dark); }
+.search-input:focus { border-color: var(--ink-black); box-shadow: 3px 3px 0 var(--beige-shadow); }
+.search-input::placeholder { color: var(--beige-shadow); }
+.search-btn { background: var(--ink-black); color: #f4f1e6; border: 2px solid var(--ink-black); border-radius: 10px; padding: 14px 28px; font-weight: 700; font-size: 1.05rem; font-family: var(--font-mono); cursor: pointer; transition: all 0.3s; letter-spacing: 0.5px; box-shadow: 2px 2px 0 var(--beige-shadow); }
+.search-btn:hover { transform: translateY(-2px); box-shadow: 3px 5px 0 var(--beige-shadow); }
+.search-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.loader { display: none; padding: 3rem; text-align: center; }
+.loader.active { display: block; }
+.spinner { width: 48px; height: 48px; border: 4px solid var(--beige-dark); border-top-color: var(--ink-black); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader p { color: #888; font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.5px; }
+
+.error-box { display: none; margin-bottom: 1.5rem; background: #f4f1e6; border: 2px solid var(--zone-risk); border-radius: 10px; padding: 1.2rem; text-align: center; color: var(--zone-risk); font-family: var(--font-mono); box-shadow: 2px 2px 0 var(--beige-dark); }
+.error-box.active { display: block; }
+
+.results-section { display: none; }
+.results-section.active { display: block; }
+
+/* Wellbeing Card */
+.wellbeing-card { background: var(--beige-light); border: 2px solid var(--beige-dark); border-radius: 10px; padding: 2rem; margin-bottom: 2rem; text-align: center; box-shadow: 2px 2px 0 var(--beige-dark); }
+.wellbeing-card h2 { font-family: var(--font-mono); font-size: 1.2rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; color: #888; }
+.wellbeing-score { font-size: 5rem; font-weight: 700; font-family: var(--font-mono); line-height: 1; margin-bottom: 0.3rem; }
+.wellbeing-score.safe { color: var(--zone-safe); }
+.wellbeing-score.caution { color: var(--zone-caution); }
+.wellbeing-score.risk { color: var(--zone-risk); }
+.wellbeing-label { font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.5px; color: #888; margin-bottom: 1rem; }
+
+.safety-badge { display: inline-block; padding: 8px 24px; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 1rem; font-family: var(--font-mono); letter-spacing: 1px; border: 2px solid; }
+.safety-badge.safe { background: rgba(45,106,79,0.12); color: var(--zone-safe); border-color: var(--zone-safe); }
+.safety-badge.caution { background: rgba(176,140,26,0.12); color: var(--zone-caution); border-color: var(--zone-caution); }
+.safety-badge.risk { background: rgba(155,34,38,0.12); color: var(--zone-risk); border-color: var(--zone-risk); }
+
+/* Stats Row */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.stat-card { background: var(--beige-light); border: 2px solid var(--beige-dark); border-radius: 10px; padding: 1.2rem; text-align: center; box-shadow: 2px 2px 0 var(--beige-dark); }
+.stat-value { font-size: 2rem; font-weight: 700; font-family: var(--font-mono); color: var(--ink-black); margin-bottom: 0.2rem; }
+.stat-label { color: #888; font-size: 0.85rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Category Breakdown */
+.categories-card { background: var(--beige-light); border: 2px solid var(--beige-dark); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 2px 2px 0 var(--beige-dark); }
+.categories-card h3 { font-family: var(--font-mono); font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 1rem; }
+
+.cat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 0.8rem; }
+.cat-label { font-family: var(--font-mono); font-size: 0.9rem; width: 140px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.5px; color: #666; }
+.cat-bar-bg { flex: 1; height: 20px; background: #f4f1e6; border: 1px solid var(--beige-dark); border-radius: 4px; overflow: hidden; }
+.cat-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; min-width: 2px; }
+.cat-bar.profanity { background: var(--zone-risk); }
+.cat-bar.threats { background: #8b0000; }
+.cat-bar.personal { background: var(--zone-caution); }
+.cat-bar.emoji { background: #c05621; }
+.cat-bar.sexual { background: #7b2d8b; }
+.cat-bar.dehumanizing { background: #555; }
+.cat-pct { font-family: var(--font-mono); font-size: 0.9rem; width: 50px; text-align: right; color: #888; }
+
+/* Tweets */
+.tweets-section h3 { font-size: 1.5rem; font-weight: 400; font-family: 'RetroSerif', serif; margin-bottom: 1.2rem; }
+.tweet-card { background: var(--beige-light); border: 2px solid var(--beige-dark); border-radius: 10px; padding: 1.3rem; margin-bottom: 1rem; border-left: 5px solid; box-shadow: 2px 2px 0 var(--beige-dark); transition: all 0.3s; }
+.tweet-card:hover { transform: translateX(4px); box-shadow: 3px 5px 0 var(--beige-shadow); }
+.tweet-card.safe { border-left-color: var(--zone-safe); }
+.tweet-card.flagged { border-left-color: var(--zone-risk); }
+.tweet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 8px; }
+.tweet-status { font-size: 0.95rem; font-weight: 700; font-family: var(--font-mono); letter-spacing: 0.5px; }
+.tweet-status.safe { color: var(--zone-safe); }
+.tweet-status.flagged { color: var(--zone-risk); }
+.tweet-score { background: #f4f1e6; border: 1px solid var(--beige-dark); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-family: var(--font-mono); color: #888; }
+.tweet-text { margin-bottom: 1rem; font-size: 1.05rem; line-height: 1.6; font-family: 'RetroSerif', serif; }
+.tweet-explanation { background: var(--screen-black); border-radius: 8px; padding: 1rem; box-shadow: inset 0 0 12px rgba(0,0,0,0.3); }
+.tweet-explanation h5 { font-size: 0.9rem; margin-bottom: 0.6rem; color: var(--crt-green); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
+.tweet-explanation ul { list-style: none; }
+.tweet-explanation li { padding: 3px 0; display: flex; align-items: flex-start; gap: 8px; color: #aaa; font-family: var(--font-mono); font-size: 0.9rem; }
+.tweet-explanation li::before { content: '→'; color: var(--crt-green); font-weight: 700; }
+
+footer { padding: 2.5rem 6%; text-align: center; border-top: 1px solid var(--beige-dark); margin-top: 1rem; }
+footer p { color: #999; font-size: 0.95rem; font-family: var(--font-mono); letter-spacing: 0.5px; }
+
+@media (max-width: 768px) {
+    .page-header h1 { font-size: 2.5rem; }
+    .island-nav { top: 12px; padding: 8px 10px; gap: 2px; }
+    .island-nav .nav-brand { display: none; }
+    .island-nav .nav-link { font-size: 0.9rem; padding: 6px 10px; }
+    .stats-row { grid-template-columns: 1fr; }
+    .search-box { flex-direction: column; }
+    .cat-label { width: 100px; font-size: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="island-nav">
+    <a href="/" class="nav-brand">CYBERSHIELD</a>
+    <a href="/" class="nav-link">Home</a>
+    <a href="/features" class="nav-link">Features</a>
+    <a href="/architecture" class="nav-link">Architecture</a>
+    <a href="/ethics" class="nav-link">Ethics</a>
+    <a href="/bully-ring" class="nav-link">Ring Detector</a>
+    <a href="/kid-shield" class="nav-link active">Kid Shield</a>
+    <a href="/safe-compose" class="nav-link">Safe Compose</a>
+    <a href="/try" class="nav-link cta-link">Try It ▸</a>
+</nav>
+
+<div class="main-layout">
+    <div class="page-header">
+        <h1>Kid Shield</h1>
+        <p class="subtitle">Youth account monitoring for parents & guardians. Analyze your child's digital behavior and get a comprehensive safety digest.</p>
+    </div>
+
+    <div class="search-section">
+        <div class="search-box">
+            <input type="text" id="usernameInput" class="search-input" placeholder="Enter child's username">
+            <button id="analyzeBtn" class="search-btn">RUN SAFETY CHECK</button>
+        </div>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>GENERATING SAFETY DIGEST...</p>
+    </div>
+
+    <div class="error-box" id="errorBox">
+        <p id="errorMessage">An error occurred.</p>
+    </div>
+
+    <div class="results-section" id="results">
+        <!-- Wellbeing Score -->
+        <div class="wellbeing-card">
+            <h2>DIGITAL WELLBEING SCORE</h2>
+            <div class="wellbeing-score" id="wellbeingScore">0</div>
+            <div class="wellbeing-label">out of 100 — higher is safer</div>
+            <div class="safety-badge" id="safetyBadge">SAFE</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="tweetsAnalyzed">0</div>
+                <div class="stat-label">Tweets Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="flaggedCount">0</div>
+                <div class="stat-label">Flagged Tweets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="riskScore">0%</div>
+                <div class="stat-label">Risk Score</div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="categories-card">
+            <h3>BEHAVIOR BREAKDOWN</h3>
+            <div id="categoriesContainer"></div>
+        </div>
+
+        <!-- Tweets -->
+        <section class="tweets-section">
+            <h3>Tweet Analysis</h3>
+            <div id="tweetsList"></div>
+        </section>
+    </div>
+</div>
+
+<footer>
+    <p>CyberShield Kid Shield · Youth Digital Safety Monitor</p>
+</footer>
+
+<script>
+const usernameInput = document.getElementById('usernameInput');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const loader = document.getElementById('loader');
+const errorBox = document.getElementById('errorBox');
+const errorMessage = document.getElementById('errorMessage');
+const results = document.getElementById('results');
+
+analyzeBtn.addEventListener('click', analyze);
+usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') analyze(); });
+
+async function analyze() {
+    const username = usernameInput.value.trim().replace('@', '');
+    if (!username) { showError('Please enter a username'); return; }
+
+    loader.classList.add('active');
+    results.classList.remove('active');
+    errorBox.classList.remove('active');
+    analyzeBtn.disabled = true;
+
+    try {
+        const resp = await fetch('/analyze-kid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        if (!resp.ok) throw new Error('Failed');
+        const data = await resp.json();
+        if (data.error) { showError(data.error); return; }
+        displayResults(data);
+    } catch (e) {
+        showError('Analysis failed. Please try again.');
+    } finally {
+        loader.classList.remove('active');
+        analyzeBtn.disabled = false;
+    }
+}
+
+function showError(msg) {
+    errorMessage.textContent = msg;
+    errorBox.classList.add('active');
+}
+
+function displayResults(data) {
+    // Wellbeing score
+    const scoreEl = document.getElementById('wellbeingScore');
+    scoreEl.textContent = data.wellbeing_score;
+    scoreEl.className = 'wellbeing-score';
+    if (data.wellbeing_score >= 70) scoreEl.classList.add('safe');
+    else if (data.wellbeing_score >= 40) scoreEl.classList.add('caution');
+    else scoreEl.classList.add('risk');
+
+    // Safety badge
+    const badge = document.getElementById('safetyBadge');
+    badge.textContent = data.safety_status;
+    badge.className = 'safety-badge';
+    if (data.safety_status === 'SAFE') badge.classList.add('safe');
+    else if (data.safety_status === 'CAUTION') badge.classList.add('caution');
+    else badge.classList.add('risk');
+
+    // Stats
+    document.getElementById('tweetsAnalyzed').textContent = data.tweets_analyzed;
+    document.getElementById('flaggedCount').textContent = data.flagged_count;
+    document.getElementById('riskScore').textContent = data.risk_score + '%';
+
+    // Categories
+    const catNames = {
+        profanity: 'Profanity',
+        threats: 'Threats',
+        personal_attacks: 'Attacks',
+        hostile_emoji: 'Hostile Emoji',
+        sexual_content: 'Sexual',
+        dehumanizing: 'Dehumanizing'
+    };
+    const catContainer = document.getElementById('categoriesContainer');
+    catContainer.innerHTML = Object.entries(data.categories).map(([key, pct]) => {
+        const cssClass = key === 'personal_attacks' ? 'personal' : 
+                         key === 'hostile_emoji' ? 'emoji' : 
+                         key === 'sexual_content' ? 'sexual' : key;
+        return `
+            <div class="cat-row">
+                <span class="cat-label">${catNames[key] || key}</span>
+                <div class="cat-bar-bg">
+                    <div class="cat-bar ${cssClass}" style="width: ${Math.max(pct, 2)}%"></div>
+                </div>
+                <span class="cat-pct">${pct}%</span>
+            </div>
+        `;
+    }).join('');
+
+    // Tweets
+    const tweetsList = document.getElementById('tweetsList');
+    tweetsList.innerHTML = data.tweets.map(tweet => `
+        <div class="tweet-card ${tweet.is_bullying ? 'flagged' : 'safe'}">
+            <div class="tweet-header">
+                <div class="tweet-status ${tweet.is_bullying ? 'flagged' : 'safe'}">
+                    ${tweet.is_bullying ? '🚨 FLAGGED' : '✓ SAFE'}
+                </div>
+                <div class="tweet-score">Score: ${tweet.score}%</div>
+            </div>
+            <p class="tweet-text">${escapeHtml(tweet.text)}</p>
+            <div class="tweet-explanation">
+                <h5>Analysis</h5>
+                <ul>
+                    ${tweet.explanation.map(e => `<li>${escapeHtml(e)}</li>`).join('')}
+                </ul>
+            </div>
+        </div>
+    `).join('');
+
+    results.classList.add('active');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+</body>
+</html>

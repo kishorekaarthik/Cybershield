@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Try CyberShield | Analyze Twitter Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+    --beige-light: #F0EDE0;
+    --beige-main: #E0DCCF;
+    --beige-dark: #C4C0B3;
+    --beige-shadow: #A09C8F;
+    --screen-black: #1a1d21;
+    --crt-green: #4af626;
+    --ink-black: #0f0f0f;
+    --font-serif: 'EB Garamond', serif;
+    --font-mono: 'VT323', monospace;
+    --zone-safe: #2d6a4f;
+    --zone-uncertain: #b08c1a;
+    --zone-moderate: #c05621;
+    --zone-high: #9b2226;
+}
+
+@font-face { font-family: 'RetroSerif'; src: local('Apple Garamond'), local('Garamond'), local('Times New Roman'); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: #f4f1e6;
+    font-family: 'RetroSerif', serif;
+    color: var(--ink-black);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* === Floating Island Navbar === */
+.island-nav {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;
+    display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+    background: rgba(228, 224, 212, 0.55);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(160, 156, 143, 0.45);
+    border-radius: 50px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.island-nav .nav-brand {
+    font-family: var(--font-mono); font-size: 1.1rem; color: var(--ink-black);
+    padding: 6px 14px; letter-spacing: 1px;
+    border-right: 1px solid rgba(160, 156, 143, 0.4);
+    margin-right: 4px; white-space: nowrap; text-decoration: none;
+}
+.island-nav .nav-link {
+    font-family: 'RetroSerif', serif; font-size: 1.05rem; color: #555;
+    text-decoration: none; padding: 7px 16px; border-radius: 30px;
+    transition: all 0.25s ease; white-space: nowrap;
+}
+.island-nav .nav-link:hover { background: rgba(15,15,15,0.07); color: var(--ink-black); }
+.island-nav .nav-link.active { background: var(--ink-black); color: #f4f1e6; }
+.island-nav .nav-link.cta-link {
+    background: var(--ink-black); color: #f4f1e6;
+    font-family: var(--font-mono); font-size: 0.95rem; letter-spacing: 0.5px; margin-left: 2px;
+}
+.island-nav .nav-link.cta-link:hover { background: #333; color: #fff; }
+
+/* === Main Layout === */
+.main-layout {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 6rem 2rem 3rem;
+}
+
+/* === Page Header === */
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--beige-dark);
+}
+.page-header h1 {
+    font-size: 4rem; font-weight: 400; font-family: 'RetroSerif', serif;
+    margin-bottom: 1rem; letter-spacing: -2px; line-height: 1;
+}
+.page-header p {
+    color: #666; font-size: 1.15rem; font-family: 'RetroSerif', serif;
+    max-width: 550px; margin: 0 auto; line-height: 1.4;
+}
+
+/* === Search Section === */
+.search-section {
+    margin-bottom: 2rem;
+}
+
+.search-box {
+    display: flex;
+    gap: 12px;
+}
+
+.search-input {
+    flex: 1;
+    background: var(--beige-light);
+    border: 2px solid var(--beige-dark);
+    color: var(--ink-black);
+    font-size: 1.1rem;
+    font-family: var(--font-mono);
+    outline: none;
+    padding: 14px 18px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.search-input:focus {
+    border-color: var(--ink-black);
+    box-shadow: 3px 3px 0 var(--beige-shadow);
+}
+
+.search-input::placeholder {
+    color: var(--beige-shadow);
+}
+
+.search-btn {
+    background: var(--ink-black);
+    color: #f4f1e6;
+    border: 2px solid var(--ink-black);
+    border-radius: 10px;
+    padding: 14px 28px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 2px 2px 0 var(--beige-shadow);
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 5px 0 var(--beige-shadow);
+}
+
+.search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* === Info Cards (below search) === */
+.info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background: var(--beige-light);
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.info-card h4 {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.info-card p, .info-card .info-item {
+    color: #666;
+    font-size: 0.95rem;
+    font-family: 'RetroSerif', serif;
+    line-height: 1.5;
+    padding: 0.2rem 0;
+}
+
+.zone-label {
+    font-family: var(--font-mono) !important;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+.zone-label.safe { color: var(--zone-safe); }
+.zone-label.uncertain { color: var(--zone-uncertain); }
+.zone-label.moderate { color: var(--zone-moderate); }
+.zone-label.high { color: var(--zone-high); }
+
+/* === Loader === */
+.loader {
+    display: none;
+    padding: 3rem;
+    text-align: center;
+}
+.loader.active { display: block; }
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--beige-dark);
+    border-top-color: var(--ink-black);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader p {
+    color: #888;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+
+/* === Error Box === */
+.error-box {
+    display: none;
+    margin-bottom: 1.5rem;
+    background: #f4f1e6;
+    border: 2px solid var(--zone-high);
+    border-radius: 10px;
+    padding: 1.2rem;
+    text-align: center;
+    color: var(--zone-high);
+    font-family: var(--font-mono);
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+.error-box.active { display: block; }
+
+/* === Results === */
+.results-section { display: none; }
+.results-section.active { display: block; }
+
+/* === Account Summary === */
+.account-summary {
+    background: var(--beige-light);
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.account-info h2 {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.2rem;
+}
+.account-info span {
+    color: #888;
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+}
+
+.risk-badge {
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+    letter-spacing: 1px;
+    border: 2px solid;
+}
+.risk-badge.safe { background: rgba(45,106,79,0.1); color: var(--zone-safe); border-color: var(--zone-safe); }
+.risk-badge.uncertain { background: rgba(176,140,26,0.1); color: var(--zone-uncertain); border-color: var(--zone-uncertain); }
+.risk-badge.moderate { background: rgba(192,86,33,0.1); color: var(--zone-moderate); border-color: var(--zone-moderate); }
+.risk-badge.high { background: rgba(155,34,38,0.1); color: var(--zone-high); border-color: var(--zone-high); }
+
+/* === Metrics Grid === */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.metric-card {
+    background: #f4f1e6;
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+    transition: all 0.3s;
+}
+.metric-card:hover {
+    border-color: var(--ink-black);
+    transform: translateY(-2px);
+    box-shadow: 3px 5px 0 var(--beige-shadow);
+}
+
+.metric-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--ink-black);
+    margin-bottom: 0.3rem;
+}
+
+.metric-label {
+    color: #888;
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* === Policy Box === */
+.policy-box {
+    background: #f4f1e6;
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.policy-box h4 {
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+
+.policy-items {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.policy-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.policy-item span:first-child {
+    color: #888;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.policy-item span:last-child {
+    font-weight: 700;
+    font-size: 1rem;
+    font-family: var(--font-mono);
+    color: var(--ink-black);
+}
+
+/* === Tweets Section === */
+.tweets-section { margin-bottom: 2rem; }
+
+.tweets-section h3 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    font-family: 'RetroSerif', serif;
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.5px;
+}
+
+/* === Tweet Card === */
+.tweet-card {
+    background: var(--beige-light);
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.3rem;
+    margin-bottom: 1rem;
+    border-left: 5px solid;
+    transition: all 0.3s;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.tweet-card:hover {
+    transform: translateX(4px);
+    box-shadow: 3px 5px 0 var(--beige-shadow);
+}
+
+.tweet-card.safe { border-left-color: var(--zone-safe); }
+.tweet-card.flagged { border-left-color: var(--zone-high); }
+
+.tweet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tweet-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+}
+.tweet-status.safe { color: var(--zone-safe); }
+.tweet-status.flagged { color: var(--zone-high); }
+
+.tweet-score {
+    background: #f4f1e6;
+    border: 1px solid var(--beige-dark);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #888;
+    font-family: var(--font-mono);
+}
+
+.tweet-text {
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    font-family: 'RetroSerif', serif;
+    color: var(--ink-black);
+}
+
+.tweet-explanation {
+    background: var(--screen-black);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.3);
+}
+
+.tweet-explanation h5 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    color: var(--crt-green);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tweet-explanation ul {
+    list-style: none;
+    font-size: 0.95rem;
+}
+
+.tweet-explanation li {
+    padding: 3px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #aaa;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+}
+
+.tweet-explanation li::before {
+    content: '→';
+    color: var(--crt-green);
+    font-weight: 700;
+}
+
+/* === Footer === */
+footer {
+    padding: 2.5rem 6%; text-align: center;
+    border-top: 1px solid var(--beige-dark); margin-top: 1rem;
+}
+footer p {
+    color: #999; font-size: 0.95rem; font-family: var(--font-mono); letter-spacing: 0.5px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .page-header h1 { font-size: 2.5rem; }
+    .island-nav { top: 12px; padding: 8px 10px; gap: 2px; }
+    .island-nav .nav-brand { display: none; }
+    .island-nav .nav-link { font-size: 0.9rem; padding: 6px 10px; }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .search-box { flex-direction: column; }
+    .summary-header { flex-direction: column; text-align: center; }
+    .info-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Floating Island Navbar -->
+<nav class="island-nav">
+    <a href="/" class="nav-brand">CYBERSHIELD</a>
+    <a href="/" class="nav-link">Home</a>
+    <a href="/features" class="nav-link">Features</a>
+    <a href="/architecture" class="nav-link">Architecture</a>
+    <a href="/ethics" class="nav-link">Ethics</a>
+    <a href="/kid-shield" class="nav-link">Kid Shield</a>
+    <a href="/safe-compose" class="nav-link">Safe Compose</a>
+    <a href="/try" class="nav-link cta-link active">Try It ▸</a>
+</nav>
+
+<div class="main-layout">
+
+    <div class="page-header">
+        <h1>Analyze Account</h1>
+        <p>Enter a Twitter username to analyze their recent tweets for potential cyberbullying content using our AI system.</p>
+    </div>
+
+    <div class="search-section">
+        <div class="search-box">
+            <input type="text" id="usernameInput" class="search-input" placeholder="Enter username (e.g. elonmusk)">
+            <button id="analyzeBtn" class="search-btn">
+                <span>ANALYZE</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="info-row">
+        <div class="info-card">
+            <h4>HOW IT WORKS</h4>
+            <p>CyberShield analyzes tweets using a Cross-Modal Transformer that combines text, image, and emoji features for comprehensive cyberbullying detection. Each tweet is scored 0–100%.</p>
+        </div>
+        <div class="info-card">
+            <h4>DETECTION ZONES</h4>
+            <div class="info-item"><span class="zone-label safe">SAFE</span> (0–40%) — No hostile patterns</div>
+            <div class="info-item"><span class="zone-label uncertain">UNCERTAIN</span> (40–60%) — Human review</div>
+            <div class="info-item"><span class="zone-label moderate">MODERATE</span> (60–80%) — Content filtered</div>
+            <div class="info-item"><span class="zone-label high">HIGH RISK</span> (80–100%) — Auto-block</div>
+        </div>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>ANALYZING TWEETS WITH CROSS-MODAL TRANSFORMER...</p>
+    </div>
+
+    <div class="error-box" id="errorBox">
+        <p id="errorMessage">An error occurred. Please try again.</p>
+    </div>
+
+    <div class="results-section" id="results">
+        <div class="account-summary">
+            <div class="summary-header">
+                <div class="account-info">
+                    <h2>@<span id="resultUsername"></span></h2>
+                    <span>ACCOUNT ANALYSIS REPORT</span>
+                </div>
+                <div class="risk-badge" id="riskBadge">SAFE</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="riskScore">0%</div>
+                    <div class="metric-label">Risk Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="tweetsAnalyzed">0</div>
+                    <div class="metric-label">Tweets Analyzed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="flaggedCount">0</div>
+                    <div class="metric-label">Flagged Tweets</div>
+                </div>
+            </div>
+            <div class="policy-box">
+                <h4>POLICY RECOMMENDATION</h4>
+                <div class="policy-items">
+                    <div class="policy-item">
+                        <span>Recommendation</span>
+                        <span id="policyAction">No Action</span>
+                    </div>
+                    <div class="policy-item">
+                        <span>Reach Reduction</span>
+                        <span id="policyReach">0%</span>
+                    </div>
+                    <div class="policy-item">
+                        <span>Account Status</span>
+                        <span id="policyStatus">Normal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="tweets-section">
+            <h3>Tweet Analysis</h3>
+            <div id="tweetsList"></div>
+        </section>
+    </div>
+
+</div>
+
+<footer>
+    <p>Powered by DistilBERT + ResNet-18 · CyberShield Research Team · 2024</p>
+</footer>
+
+<script>
+    const usernameInput = document.getElementById('usernameInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loader = document.getElementById('loader');
+    const errorBox = document.getElementById('errorBox');
+    const errorMessage = document.getElementById('errorMessage');
+    const results = document.getElementById('results');
+
+    analyzeBtn.addEventListener('click', analyzeAccount);
+    usernameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') analyzeAccount();
+    });
+
+    async function analyzeAccount() {
+        const username = usernameInput.value.trim().replace('@', '');
+        if (!username) {
+            showError('Please enter a valid username');
+            return;
+        }
+
+        loader.classList.add('active');
+        results.classList.remove('active');
+        errorBox.classList.remove('active');
+        analyzeBtn.disabled = true;
+
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+
+            if (!response.ok) throw new Error('Analysis failed');
+
+            const data = await response.json();
+            displayResults(data);
+        } catch (error) {
+            showError('Failed to analyze account. Please try again.');
+        } finally {
+            loader.classList.remove('active');
+            analyzeBtn.disabled = false;
+        }
+    }
+
+    function showError(msg) {
+        errorMessage.textContent = msg;
+        errorBox.classList.add('active');
+    }
+
+    function displayResults(data) {
+        document.getElementById('resultUsername').textContent = data.username;
+        document.getElementById('riskScore').textContent = data.risk_score + '%';
+        document.getElementById('tweetsAnalyzed').textContent = data.tweets.length;
+        document.getElementById('flaggedCount').textContent = data.tweets.filter(t => t.is_bullying).length;
+
+        const riskBadge = document.getElementById('riskBadge');
+        riskBadge.textContent = data.risk_zone;
+        riskBadge.className = 'risk-badge ' + data.risk_zone.toLowerCase();
+
+        document.getElementById('policyAction').textContent = data.policy.recommendation;
+        document.getElementById('policyReach').textContent = data.policy.reach_reduction;
+        document.getElementById('policyStatus').textContent = data.policy.account_status;
+
+        const tweetsList = document.getElementById('tweetsList');
+        tweetsList.innerHTML = data.tweets.map(tweet => `
+            <div class="tweet-card ${tweet.is_bullying ? 'flagged' : 'safe'}">
+                <div class="tweet-header">
+                    <div class="tweet-status ${tweet.is_bullying ? 'flagged' : 'safe'}">
+                        ${tweet.is_bullying ? '🚨 FLAGGED' : '✓ SAFE'}
+                    </div>
+                    <div class="tweet-score">Score: ${tweet.score}%</div>
+                </div>
+                <p class="tweet-text">${escapeHtml(tweet.text)}</p>
+                <div class="tweet-explanation">
+                    <h5>Analysis</h5>
+                    <ul>
+                        ${tweet.explanation.map(e => `<li>${escapeHtml(e)}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `).join('');
+
+        results.classList.add('active');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Features | CyberShield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+    --beige-light: #F0EDE0;
+    --beige-main: #E0DCCF;
+    --beige-dark: #C4C0B3;
+    --beige-shadow: #A09C8F;
+    --screen-black: #1a1d21;
+    --crt-green: #4af626;
+    --ink-black: #0f0f0f;
+    --font-serif: 'EB Garamond', serif;
+    --font-mono: 'VT323', monospace;
+}
+
+@font-face { font-family: 'RetroSerif'; src: local('Apple Garamond'), local('Garamond'), local('Times New Roman'); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: #f4f1e6;
+    font-family: 'RetroSerif', serif;
+    color: var(--ink-black);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* === Floating Island Navbar === */
+.island-nav {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;
+    display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+    background: rgba(228, 224, 212, 0.55);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(160, 156, 143, 0.45);
+    border-radius: 50px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.island-nav .nav-brand {
+    font-family: var(--font-mono); font-size: 1.1rem; color: var(--ink-black);
+    padding: 6px 14px; letter-spacing: 1px;
+    border-right: 1px solid rgba(160, 156, 143, 0.4);
+    margin-right: 4px; white-space: nowrap; text-decoration: none;
+}
+.island-nav .nav-link {
+    font-family: 'RetroSerif', serif; font-size: 1.05rem; color: #555;
+    text-decoration: none; padding: 7px 16px; border-radius: 30px;
+    transition: all 0.25s ease; white-space: nowrap;
+}
+.island-nav .nav-link:hover { background: rgba(15,15,15,0.07); color: var(--ink-black); }
+.island-nav .nav-link.active { background: var(--ink-black); color: #f4f1e6; }
+.island-nav .nav-link.cta-link {
+    background: var(--ink-black); color: #f4f1e6;
+    font-family: var(--font-mono); font-size: 0.95rem; letter-spacing: 0.5px; margin-left: 2px;
+}
+.island-nav .nav-link.cta-link:hover { background: #333; color: #fff; }
+
+/* === Page Header === */
+.page-header {
+    padding: 7rem 6% 3rem;
+    text-align: center;
+    border-bottom: 1px solid var(--beige-dark);
+}
+.page-header h1 {
+    font-size: 4.5rem; font-weight: 400; font-family: 'RetroSerif', serif;
+    margin-bottom: 1rem; letter-spacing: -2px; line-height: 1;
+}
+.page-header p {
+    color: #666; font-size: 1.25rem; font-family: 'RetroSerif', serif;
+    max-width: 650px; margin: 0 auto; line-height: 1.4;
+}
+
+/* === Section Headers === */
+.section-header { text-align: center; margin-bottom: 2.5rem; }
+.section-header h2 {
+    font-size: 2.5rem; font-weight: 400; font-family: 'RetroSerif', serif;
+    letter-spacing: -1px; margin-bottom: 0.5rem;
+}
+.section-header p { color: #777; font-size: 1.1rem; font-family: 'RetroSerif', serif; }
+
+/* === Feature Blocks === */
+.features-section { padding: 3.5rem 6%; max-width: 1100px; margin: 0 auto; }
+
+.feature-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin-bottom: 4rem;
+    padding-bottom: 4rem;
+    border-bottom: 1px solid var(--beige-dark);
+}
+.feature-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.feature-block:nth-child(even) { direction: rtl; }
+.feature-block:nth-child(even) > * { direction: ltr; }
+
+.feature-content h2 {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+    letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 0.75rem;
+}
+.feature-content h2 span { font-size: 2rem; }
+.feature-content p {
+    color: #555; font-family: 'RetroSerif', serif;
+    font-size: 1.05rem; margin-bottom: 1.2rem; line-height: 1.5;
+}
+.feature-list { list-style: none; }
+.feature-list li {
+    padding: 0.4rem 0; display: flex; align-items: flex-start; gap: 0.75rem;
+    color: #555; font-family: 'RetroSerif', serif; font-size: 1rem;
+}
+.feature-list li::before {
+    content: '—';
+    color: var(--ink-black);
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* === Feature Visuals === */
+.feature-visual {
+    background: var(--beige-light);
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+
+.code-block {
+    background: var(--screen-black);
+    border-radius: 8px;
+    padding: 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--crt-green);
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+}
+.code-block .keyword { color: #ff9e64; }
+.code-block .string { color: var(--crt-green); }
+.code-block .comment { color: #636669; }
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.6rem;
+}
+.emoji-item {
+    background: #f4f1e6;
+    border: 2px solid var(--beige-dark);
+    border-radius: 8px;
+    padding: 0.65rem;
+    text-align: center;
+    font-size: 1.4rem;
+    transition: all 0.3s;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+.emoji-item:hover {
+    transform: scale(1.15) translateY(-3px);
+    border-color: var(--ink-black);
+    box-shadow: 3px 4px 0 var(--beige-shadow);
+}
+
+.pattern-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.pattern-card {
+    background: #f4f1e6;
+    border: 2px solid var(--beige-dark);
+    border-left: 4px solid var(--ink-black);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+}
+.pattern-card h4 {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.5px;
+}
+.pattern-card code {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* === Tech Stack === */
+.tech-stack {
+    padding: 3.5rem 6%;
+    background: var(--beige-main);
+    border-top: 1px solid var(--beige-dark);
+}
+.tech-container { max-width: 1100px; margin: 0 auto; }
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+.tech-card {
+    background: #f4f1e6;
+    border: 2px solid var(--beige-dark);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 2px 2px 0 var(--beige-dark);
+    transition: all 0.3s;
+}
+.tech-card:hover {
+    border-color: var(--ink-black);
+    transform: translateY(-3px);
+    box-shadow: 3px 5px 0 var(--beige-shadow);
+}
+.tech-icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
+.tech-card h3 {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.5px;
+}
+.tech-card p {
+    color: #666; font-size: 0.95rem; font-family: 'RetroSerif', serif;
+}
+
+/* === Footer === */
+footer {
+    padding: 3rem 6%; text-align: center;
+    border-top: 1px solid var(--beige-dark); margin-top: 2rem;
+}
+footer p {
+    color: #999; font-size: 0.95rem; font-family: var(--font-mono); letter-spacing: 0.5px;
+}
+footer a {
+    color: var(--ink-black); text-decoration: none;
+    border-bottom: 1px solid var(--beige-dark); transition: border-color 0.2s;
+}
+footer a:hover { border-color: var(--ink-black); }
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .page-header h1 { font-size: 3rem; }
+    .island-nav { top: 12px; padding: 8px 10px; gap: 2px; }
+    .island-nav .nav-brand { display: none; }
+    .island-nav .nav-link { font-size: 0.9rem; padding: 6px 10px; }
+    .feature-block { grid-template-columns: 1fr; }
+    .feature-block:nth-child(even) { direction: ltr; }
+    .emoji-grid { grid-template-columns: repeat(5, 1fr); }
+    .pattern-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Floating Island Navbar -->
+<nav class="island-nav">
+    <a href="/" class="nav-brand">CYBERSHIELD</a>
+    <a href="/" class="nav-link">Home</a>
+    <a href="/features" class="nav-link active">Features</a>
+    <a href="/architecture" class="nav-link">Architecture</a>
+    <a href="/ethics" class="nav-link">Ethics</a>
+    <a href="/kid-shield" class="nav-link">Kid Shield</a>
+    <a href="/safe-compose" class="nav-link">Safe Compose</a>
+    <a href="/try" class="nav-link cta-link">Try It ▸</a>
+</nav>
+
+<div class="page-header">
+    <h1>Detection Features</h1>
+    <p>Multi-modal AI combining text analysis, emoji intelligence, and pattern recognition for cyberbullying detection.</p>
+</div>
+
+<section class="features-section">
+
+    <!-- Feature 1: Text Analysis -->
+    <div class="feature-block">
+        <div class="feature-content">
+            <h2><span>🔍</span> DEEP TEXT ANALYSIS</h2>
+            <p>DistilBERT-powered text encoder with multiple detection layers for obvious and subtle abuse.</p>
+            <ul class="feature-list">
+                <li>200+ offensive words with variants</li>
+                <li>Leetspeak detection (a$$hole, 1d10t)</li>
+                <li>Character repetition normalization</li>
+                <li>Spaced-out word detection</li>
+                <li>Sarcasm and context analysis</li>
+            </ul>
+        </div>
+        <div class="feature-visual">
+            <div class="code-block">
+                <span class="comment"># Lexicon Categories</span><br>
+                <span class="keyword">profanity</span> = [<span class="string">'asshole'</span>, ...]<br>
+                <span class="keyword">slurs</span> = [<span class="string">'faggot'</span>, ...]<br>
+                <span class="keyword">threats</span> = [<span class="string">'kill'</span>, ...]<br><br>
+                <span class="comment"># Evasion Detection</span><br>
+                <span class="string">"a$$h0l3"</span> → <span class="string">"asshole"</span> ✓
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 2: Emoji Intelligence -->
+    <div class="feature-block">
+        <div class="feature-content">
+            <h2><span>😈</span> EMOJI INTELLIGENCE</h2>
+            <p>Specialized tokenizer identifying 28+ emojis used to amplify abusive content.</p>
+            <ul class="feature-list">
+                <li>Hostile emoji vocabulary</li>
+                <li>Context-aware interpretation</li>
+                <li>Combined text + emoji severity</li>
+            </ul>
+        </div>
+        <div class="feature-visual">
+            <h4 style="margin-bottom:0.8rem; font-family: var(--font-mono); font-size: 0.95rem; color: #888; letter-spacing: 0.5px;">HOSTILE EMOJI DETECTION</h4>
+            <div class="emoji-grid">
+                <div class="emoji-item">😡</div><div class="emoji-item">🤬</div><div class="emoji-item">👿</div>
+                <div class="emoji-item">😠</div><div class="emoji-item">🖕</div><div class="emoji-item">🤡</div>
+                <div class="emoji-item">💀</div><div class="emoji-item">🔪</div><div class="emoji-item">💣</div>
+                <div class="emoji-item">💢</div><div class="emoji-item">👎</div><div class="emoji-item">🤮</div>
+                <div class="emoji-item">💩</div><div class="emoji-item">☠️</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 3: Pattern Detection -->
+    <div class="feature-block">
+        <div class="feature-content">
+            <h2><span>🎯</span> PATTERN DETECTION</h2>
+            <p>Advanced regex patterns for personal attacks, threats, and harassment.</p>
+            <ul class="feature-list">
+                <li>Personal attack labeling</li>
+                <li>Direct threat detection</li>
+                <li>Suicide encouragement (CRITICAL)</li>
+                <li>Dehumanizing comparisons</li>
+            </ul>
+        </div>
+        <div class="feature-visual">
+            <div class="pattern-cards">
+                <div class="pattern-card"><h4>THREATS</h4><code>"kill yourself" → +0.25</code></div>
+                <div class="pattern-card"><h4>PERSONAL ATTACKS</h4><code>"you are a racist" → +0.10</code></div>
+                <div class="pattern-card"><h4>INTENSIFIED</h4><code>"fucking idiot" → +0.08</code></div>
+                <div class="pattern-card"><h4>DEHUMANIZING</h4><code>"you're an animal" → +0.12</code></div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section class="tech-stack">
+    <div class="tech-container">
+        <div class="section-header">
+            <h2>Technology Stack</h2>
+            <p>Built with industry-leading ML frameworks</p>
+        </div>
+        <div class="tech-grid">
+            <div class="tech-card"><div class="tech-icon">🔤</div><h3>DISTILBERT</h3><p>Lightweight transformer for text encoding</p></div>
+            <div class="tech-card"><div class="tech-icon">🖼️</div><h3>RESNET-18</h3><p>Pre-trained image encoder</p></div>
+            <div class="tech-card"><div class="tech-icon">🔥</div><h3>PYTORCH</h3><p>Deep learning with GPU support</p></div>
+            <div class="tech-card"><div class="tech-icon">🌐</div><h3>FLASK</h3><p>Web framework for API</p></div>
+            <div class="tech-card"><div class="tech-icon">🐦</div><h3>TWITTER API</h3><p>Real-time tweet fetching</p></div>
+            <div class="tech-card"><div class="tech-icon">⚡</div><h3>TRANSFORMERS</h3><p>HuggingFace NLP models</p></div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>Built by CyberShield Team · <a href="/ethics">Ethics & Transparency</a></p>
+</footer>
+
+</body>
+</html>
