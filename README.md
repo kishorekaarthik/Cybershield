@@ -1,61 +1,139 @@
-# CyberShield: Real-Time Toxicity Detection & Prevention
+# CyberShield: Real-Time Toxicity Detection Platform
 
-CyberShield is an advanced content moderation system that proactively detects and prevents online harassment before it happens. At its core is a **Chrome Extension** that integrates directly into social media platforms (Twitter/X) to analyze text in real-time, coupled with a powerful **AI Detection Engine**.
+CyberShield is a comprehensive content moderation system designed to detect and prevent online harassment in real-time. It integrates a sophisticated cross-modal transformer fusion engine with a browser-based intervention tool, enabling proactive moderation directly within social media interfaces.
 
-## 🚀 Core Features
+## Project Overview
+
+This repository contains the complete source code for the CyberShield platform, which consists of three main components:
+1. **Core Detection Engine**: A Flask-based backend API powered by a custom deep learning model (BERT + ResNet fusion) trained on the MMHS150K dataset.
+2. **Safe Compose Extension**: A Chrome extension that injects a real-time toxicity analysis overlay into Twitter/X.
+3. **Kid Shield Dashboard**: A web interface for monitoring youth account safety and analyzing interaction patterns.
+
+## Features
 
 ### 1. Safe Compose (Chrome Extension)
-The primary interface for CyberShield. It injects a real-time toxicity analysis overlay directly into the Twitter/X compose box.
-- **Live Toxicity Meter**: As you type, the extension scores your text for toxicity, aggression, and hate speech.
-- **Instant Feedback**: Visual indicators (Green/Yellow/Red) let you know if your message is safe or harmful.
-- **Smart Rewrites**: Uses LLMs to suggest empathetic, non-toxic alternatives for your draft.
-- **Privacy-First**: Analysis happens securely via your local inference server; no data is stored by the extension.
+The flagship feature of CyberShield. It provides immediate feedback to users as they type on social media platforms.
+- **Real-Time Analysis**: As the user types in the compose box, the text is sent to the local inference server for analysis.
+- **Visual Toxicity Meter**: A dynamic bar indicates the toxicity level (Safe, Uncertain, Moderate, High).
+- **Intervention System**: High-toxicity content triggers a warning and temporarily disables the "Post" button (simulated).
+- **Generative Rewrite**: Users can click "Rewrite with Empathy" to have an LLM-based agent suggest a non-toxic version of their message while preserving the original intent.
 
 ### 2. Cyberbullying Detection Engine
-The brain behind the system. A sophisticated AI model designed to understand context and nuance.
-- **Cross-Modal Fusion**: Combines BERT-based text analysis with metadata processing for higher accuracy.
-- **MMHS150K Trained**: Fine-tuned on massive hate speech datasets to recognize subtle forms of abuse.
-- **Leetspeak Detection**: Identifies evasion attempts (e.g., "h4te", "@$$hole") that standard filters miss.
-- **Risk Classification**: Categorizes content into granular risk tiers (Personal Attack, Racism, Sexism, etc.).
+The backend logic that powers the analysis.
+- **Multi-Modal Analysis**: Capable of processing both text and image data (architecture supports future image integration).
+- **Granular Classification**: Identifies specific types of toxicity including Racism, Sexism, Physical Threats, and Personal Attacks.
+- **Anti-Evasion**: Detects "leetspeak" and adversarial text modifications (e.g., using numbers for letters).
 
-### 3. Kid Shield (Additional Feature)
-A supplemental safety tool for monitoring youth activity.
-- **Safety Digest**: Provides periodic summaries of online interactions.
-- **Risk Assessment**: Flags potential grooming or bullying patterns without invasive surveillance.
+### 3. Kid Shield
+A safety monitoring tool for parents and guardians.
+- **Safety Digest**: Aggregates a user's recent activity to provide a "Digital Wellbeing Score".
+- **Risk Breakdown**: Visualizes exposure to different types of harmful content.
 
-## 🛠️ Installation & Setup
+## Installation Guide
 
 ### Prerequisites
-- Python 3.8+
-- Google Chrome or Chromium-based browser
+- Python 3.8 or higher
+- Google Chrome or a Chromium-based browser (Brave, Edge, etc.)
+- Git
 
-### Backend Setup (The Detection Engine)
-1. **Clone the repository**:
+### Part 1: Backend Setup
+The backend must be running for the extension and dashboard to function.
+
+1. **Clone the Repository**
    ```bash
-   git clone https://github.com/kishorekaarthik/Cybershield.git
+   git clone https://github.com/YourUsername/CyberShield.git
    cd Cybershield
    ```
-2. **Install dependencies**:
+
+2. **Create a Virtual Environment**
+   It is recommended to use a virtual environment to manage dependencies.
+   ```bash
+   python -m venv venv
+   # Windows:
+   .\venv\Scripts\activate
+   # Mac/Linux:
+   source venv/bin/activate
+   ```
+
+3. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
-3. **Start the API server**:
+
+4. **Start the Server**
    ```bash
    python app.py
    ```
-   *The server runs on `http://localhost:5000` to handle analysis requests.*
+   You should see output indicating the server is running on `http://localhost:5000`.
 
-### Chrome Extension Setup
-1. Open Chrome and go to `chrome://extensions/`.
-2. Enable **Developer mode** (top right toggle).
-3. Click **Load unpacked**.
-4. Select the `chrome-extension` folder from this project.
-5. Go to Twitter/X and start composing!
+### Part 2: Extension Setup
+1. Open Google Chrome and navigate to `chrome://extensions/`.
+2. Toggle **Developer mode** in the top right corner.
+3. Click the **Load unpacked** button.
+4. Select the `chrome-extension` folder located inside the cloned repository.
+5. The "CyberShield - Safe Compose" extension should now appear in your list.
 
-## 🏗️ Architecture
-- **Frontend**: Chrome Extension (JS/HTML/CSS) for direct user interaction.
-- **Backend**: Flask API serving the PyTorch/Transformer model.
-- **Model**: Custom Late-Fusion Architecture (BERT + ResNet + Metadata).
+## Usage Instructions
+
+### Using Safe Compose (Twitter/X)
+1. Ensure the Flask backend is running (`python app.py`).
+2. Navigate to [twitter.com](https://twitter.com) or [x.com](https://x.com).
+3. Click on the "Post" button to open the compose box.
+4. Start typing. You will see the CyberShield overlay appear at the bottom of the compose window.
+   - **Green Bar**: Your text is safe.
+   - **Yellow/Orange Bar**: Your text contains potential toxicity.
+   - **Red Bar**: High toxicity detected.
+5. If High Toxicity is detected:
+   - Click the **Rewrite with Empathy** button.
+   - Wait for the suggestion.
+   - Click **Use This** to replace your text with the sanitized version.
+
+### Using the Dashboards
+1. Open your browser and go to `http://localhost:5000`.
+2. **Kid Shield**: Navigate to `/kid-shield`. Enter a Twitter handle (e.g., `@handle`) to generate a simulated safety report.
+3. **Live Demo**: Navigate to `/safe-compose` (or click "Safe Compose" in the nav) to test the detection engine without the extension.
+
+## API Reference
+
+The backend exposes the following REST endpoints:
+
+- **POST /analyze-live**
+  - **Input**: JSON `{ "text": "user input string" }`
+  - **Output**: JSON containing `score` (0-100), `risk` (Safe/High), `label` (e.g., "Personal Attack"), and `zones` (evasion detection).
+  - **Description**: Real-time analysis endpoint used by the Chrome Extension.
+
+- **POST /rewrite-empathy**
+  - **Input**: JSON `{ "text": "toxic string" }`
+  - **Output**: JSON `{ "rewritten": "sanitized string", "new_score": 15 }`
+  - **Description**: Generates a fast, non-toxic rewrite of the input text.
+
+- **POST /analyze-kid**
+  - **Input**: form-data `username`
+  - **Output**: JSON safety digest with wellbeing score and categorized tweet analysis.
+
+## Project Structure
+
+- `app.py`: Main Flask application entry point.
+- `model_engine.py`: Contains the `CyberBullyingModel` class and inference logic.
+- `chrome-extension/`: Source code for the browser extension.
+  - `manifest.json`: Extension configuration (Manifest V3).
+  - `content.js`: Script that injects the overlay into Twitter.
+  - `background.js`: Service worker for API communication.
+- `templates/`: HTML files for the web dashboard (index, kid_shield, etc.).
+- `static/`: CSS and assets for the web dashboard.
+- `requirements.txt`: Python dependency list.
+
+## Troubleshooting
+
+**Extension says "Connection Error"**
+- Ensure `app.py` is running.
+- Check if `http://localhost:5000/` loads in your browser.
+- Verify that `flask-cors` is installed (`pip install flask-cors`).
+
+**Extension not showing up on Twitter**
+- Refresh the Twitter page.
+- Ensure you are on the "Compose" or "Reply" screen.
+- Check `chrome://extensions` to make sure the extension is enabled and has no errors.
 
 ## License
-MIT License
+This project is licensed under the MIT License.
