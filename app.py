@@ -90,9 +90,6 @@ def ethics():
 def try_page():
     return render_template("try.html")
 
-@app.route("/kid-shield")
-def kid_shield():
-    return render_template("kid_shield.html")
 
 @app.route("/safe-compose")
 def safe_compose():
@@ -110,7 +107,7 @@ def analyze():
         return jsonify({"error": "Username required"}), 400
 
     # Fetch tweets (real or dummy)
-    tweets = fetch_user_tweets(username, max_results=10)
+    tweets = fetch_user_tweets(username, max_results=100)
 
     results = []
     scores = []
@@ -154,7 +151,7 @@ def analyze_ring():
         return jsonify({"error": "Username required"}), 400
 
     # Fetch target's tweets to simulate accounts interacting with them
-    tweets = fetch_user_tweets(target, max_results=10)
+    tweets = fetch_user_tweets(target, max_results=100)
 
     if not tweets:
         return jsonify({"error": "Could not fetch tweets for this user"}), 404
@@ -254,91 +251,6 @@ def analyze_ring():
     })
 
 # -------------------------------------------------
-# KID SHIELD ENDPOINT
-# -------------------------------------------------
-@app.route("/analyze-kid", methods=["POST"])
-def analyze_kid():
-    data = request.get_json()
-    username = data.get("username")
-
-    if not username:
-        return jsonify({"error": "Username required"}), 400
-
-    tweets = fetch_user_tweets(username, max_results=10)
-
-    if not tweets:
-        return jsonify({"error": "Could not fetch tweets for this user"}), 404
-
-    results = []
-    scores = []
-    categories = {
-        "profanity": 0,
-        "threats": 0,
-        "personal_attacks": 0,
-        "hostile_emoji": 0,
-        "sexual_content": 0,
-        "dehumanizing": 0
-    }
-
-    for t in tweets:
-        res = model.predict_and_explain(t["text"])
-        scores.append(res["severity_score"])
-
-        # Categorize explanations
-        for exp in res["explanation"]:
-            exp_lower = exp.lower()
-            if "keyword trigger" in exp_lower:
-                categories["profanity"] += 1
-            if "threat" in exp_lower or "suicide" in exp_lower:
-                categories["threats"] += 1
-            if "personal attack" in exp_lower:
-                categories["personal_attacks"] += 1
-            if "emoji trigger" in exp_lower:
-                categories["hostile_emoji"] += 1
-            if "sexual" in exp_lower:
-                categories["sexual_content"] += 1
-            if "dehumaniz" in exp_lower:
-                categories["dehumanizing"] += 1
-
-        results.append({
-            "text": t["text"],
-            "is_bullying": res["is_bullying"],
-            "score": round(res["severity_score"] * 100, 1),
-            "explanation": res["explanation"]
-        })
-
-    avg_score = sum(scores) / len(scores) if scores else 0.0
-    wellbeing_score = max(0, min(100, int((1 - avg_score) * 100)))
-
-    # Safety status
-    if wellbeing_score >= 70:
-        safety_status = "SAFE"
-    elif wellbeing_score >= 40:
-        safety_status = "CAUTION"
-    else:
-        safety_status = "AT RISK"
-
-    flagged_count = sum(1 for r in results if r["is_bullying"])
-    total_triggers = sum(categories.values())
-
-    # Calculate percentages
-    cat_pcts = {}
-    for cat, count in categories.items():
-        cat_pcts[cat] = round((count / total_triggers * 100) if total_triggers > 0 else 0, 1)
-
-    return jsonify({
-        "username": username,
-        "wellbeing_score": wellbeing_score,
-        "safety_status": safety_status,
-        "risk_score": int(avg_score * 100),
-        "tweets_analyzed": len(results),
-        "flagged_count": flagged_count,
-        "categories": cat_pcts,
-        "category_counts": categories,
-        "tweets": results
-    })
-
-# -------------------------------------------------
 # SAFE COMPOSE — LIVE ANALYSIS ENDPOINT
 # -------------------------------------------------
 @app.route("/analyze-live", methods=["POST"])
@@ -376,6 +288,20 @@ def analyze_live():
 # -------------------------------------------------
 REWRITE_MAP = {
     # Profanity → civil alternatives
+    "fuck": "dislike",
+    "fucked": "messed up",
+    "fucker": "person",
+    "fuckers": "people",
+    "fucking": "very",
+    "fuck you": "I strongly disagree with you",
+    "fuck off": "please go away",
+    "shit": "stuff",
+    "shitty": "poor",
+    "bullshit": "nonsense",
+    "dick": "jerk",
+    "dickhead": "unkind person",
+    "cock": "person",
+    "pussy": "coward",
     "idiot": "person I disagree with",
     "idiots": "people I disagree with",
     "stupid": "misguided",

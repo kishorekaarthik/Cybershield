@@ -1,133 +1,237 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    width: 320px;
-    background: #f4f1e6;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    color: #0f0f0f;
-    padding: 20px;
-}
-.header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e0dccf;
-}
-.shield-icon {
-    width: 36px; height: 36px;
-    background: #0f0f0f;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    color: #f4f1e6;
-    font-size: 18px;
-    font-weight: 800;
-}
-h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-.subtitle { font-size: 12px; color: #888; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield</title>
+    <style>
+        :root {
+            --c-paper: #EFEEE9;
+            --c-ink: #111111;
+            --c-acid: #D4DE3A;
+            --c-acid-glass: rgba(212, 222, 58, 0.65);
+            --c-text-dim: #555555;
+            --f-display: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            --f-mono: 'Consolas', 'Courier New', monospace;
+        }
 
-.status {
-    background: #e8f5e9;
-    border: 1px solid #2d6a4f;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 14px;
-    text-align: center;
-}
-.status-dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #2d6a4f;
-    margin-right: 6px;
-    animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-.status span { font-size: 13px; font-weight: 700; color: #2d6a4f; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.info { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 14px; }
-.info strong { color: #0f0f0f; }
+        body {
+            width: 320px;
+            background: var(--c-paper);
+            font-family: var(--f-display);
+            color: var(--c-ink);
+            overflow: hidden;
+        }
 
-.feature-list { list-style: none; margin-bottom: 16px; }
-.feature-list li {
-    padding: 6px 0;
-    font-size: 12px;
-    color: #444;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.feature-list li::before {
-    content: '✓';
-    color: #2d6a4f;
-    font-weight: 800;
-    font-size: 14px;
-}
+        /* Header */
+        .popup-header {
+            padding: 20px 20px 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--c-ink);
+        }
 
-.link-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background: #0f0f0f;
-    color: #f4f1e6;
-    border: none;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    letter-spacing: 0.3px;
-    transition: background 0.2s;
-}
-.link-btn:hover { background: #333; }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-.footer {
-    margin-top: 14px;
-    text-align: center;
-    font-size: 10px;
-    color: #aaa;
-}
-</style>
+        .brand-icon {
+            width: 16px;
+            height: 16px;
+            background: var(--c-ink);
+            border-radius: 50%;
+            position: relative;
+        }
+        .brand-icon::before,
+        .brand-icon::after {
+            content: '';
+            position: absolute;
+            background: var(--c-acid);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .brand-icon::before { width: 2px; height: 10px; }
+        .brand-icon::after { width: 10px; height: 2px; }
+
+        .brand-name {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .version-tag {
+            font-family: var(--f-mono);
+            font-size: 9px;
+            color: var(--c-text-dim);
+            text-align: right;
+            line-height: 1.5;
+        }
+
+        /* Status Section */
+        .status-section {
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(17,17,17,0.15);
+        }
+
+        .status-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-family: var(--f-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--c-text-dim);
+            font-weight: 700;
+        }
+
+        .status-value {
+            font-family: var(--f-mono);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-pill {
+            background: var(--c-acid-glass);
+            border: 2px solid var(--c-ink);
+            padding: 3px 12px;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: var(--f-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 2px 2px 0px var(--c-ink);
+        }
+
+        .status-pill.online  { 
+            color: var(--c-ink);
+            background: var(--c-acid);
+        }
+        .status-pill.offline { 
+            color: #fff;
+            background: #d32f2f;
+            border-color: #d32f2f;
+            box-shadow: 2px 2px 0px #8b0000;
+        }
+
+        /* Action Footer */
+        .popup-footer {
+            background: var(--c-ink);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-top: 2px solid var(--c-ink);
+        }
+
+        .footer-btn {
+            background: var(--c-acid);
+            color: var(--c-ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            flex-shrink: 0;
+            transition: transform 0.15s, box-shadow 0.15s;
+            padding: 10px 18px;
+            font-family: var(--f-mono);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 2px solid var(--c-acid);
+            box-shadow: 2px 2px 0px rgba(212,222,58,0.3);
+        }
+
+        .footer-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 0 0 0;
+        }
+
+        .footer-text {
+            font-family: var(--f-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--c-acid);
+            opacity: 0.5;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <div class="shield-icon">🛡️</div>
-        <div>
-            <h1>CyberShield</h1>
-            <div class="subtitle">Safe Compose Extension</div>
+
+    <!-- Header -->
+    <div class="popup-header">
+        <div class="brand">
+            <div class="brand-icon"></div>
+            <span class="brand-name">CyberShield</span>
+        </div>
+        <div class="version-tag">V1.0.0<br>SAFE COMPOSE</div>
+    </div>
+
+    <!-- Status -->
+    <div class="status-section">
+        <div class="status-row">
+            <span class="status-label">Server</span>
+            <span class="status-pill" id="serverPill">CHECKING</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">Platform</span>
+            <span class="status-value">TWITTER / X</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">Endpoint</span>
+            <span class="status-value">LOCALHOST:5000</span>
+        </div>
+        <div class="status-row">
+            <span class="status-label">Protection</span>
+            <span class="status-value">REAL-TIME</span>
         </div>
     </div>
 
-    <div class="status">
-        <span class="status-dot"></span>
-        <span>Active on Twitter / X</span>
+    <!-- Footer -->
+    <div class="popup-footer">
+        <a class="footer-btn" href="http://localhost:5000" target="_blank">
+            Open Dashboard →
+        </a>
+        <div class="footer-text">View full<br>analytics</div>
     </div>
 
-    <p class="info">
-        CyberShield analyzes your tweets <strong>in real-time</strong> as you type. A toxicity meter appears below every compose box — helping you communicate without harassment.
-    </p>
-
-    <ul class="feature-list">
-        <li>Live toxicity scoring as you type</li>
-        <li>Word-level trigger detection</li>
-        <li>Empathy rewrite suggestions</li>
-        <li>Works on tweets, replies, and DMs</li>
-        <li>Powered by DistilBERT + ResNet-18</li>
-    </ul>
-
-    <a href="http://localhost:5000" class="link-btn" target="_blank">Open CyberShield Dashboard</a>
-
-    <div class="footer">
-        CyberShield Research Team · v1.0.0
-    </div>
+    <script>
+        fetch('http://localhost:5000/')
+            .then(() => {
+                const pill = document.getElementById('serverPill');
+                pill.textContent = 'CONNECTED';
+                pill.className = 'status-pill online';
+            })
+            .catch(() => {
+                const pill = document.getElementById('serverPill');
+                pill.textContent = 'OFFLINE';
+                pill.className = 'status-pill offline';
+            });
+    </script>
 </body>
 </html>

@@ -17,13 +17,10 @@ try:
     import torchvision.models as models
     from torchvision import transforms
 except ImportError:
-    print("❌ Critical libraries missing.")
+    print("Critical libraries missing.")
     print("Run: pip install torch torchvision transformers pandas numpy pillow requests")
     exit(1)
 
-# ==========================================
-# 1. UTILITIES & TOKENIZERS
-# ==========================================
 
 class SimpleEmojiTokenizer:
     def __init__(self):
@@ -38,9 +35,6 @@ class SimpleEmojiTokenizer:
         found_tokens = [self.emoji_vocab[char] for char in text if char in self.emoji_vocab]
         return found_tokens if found_tokens else [0]
 
-# ==========================================
-# 2. DATASET (MMHS150K INTEGRATION)
-# ==========================================
 
 class MMHS150KDataset(Dataset):
     def __init__(self, json_path, img_dir, tokenizer, emoji_tokenizer, transform=None, split='train'):
@@ -128,9 +122,7 @@ def custom_collate(batch):
         'aggression_score': torch.stack([x['aggression_score'] for x in batch])
     }
 
-# ==========================================
-# 3. MODEL ARCHITECTURE (FIXED)
-# ==========================================
+
 
 class AdapterLayer(nn.Module):
     def __init__(self, hidden_dim, adapter_dim=64):
@@ -456,18 +448,28 @@ class CyberBullyModel(nn.Module):
         despaced_text = re.sub(r'\b(\w)\s+(?=\w\s|\w\b)', r'\1', text_lower)
         despaced_words = re.findall(r"\w+", despaced_text)
         for w in despaced_words:
-            if w in self._offensive_words and len(w) > 3:
+            if w in self._offensive_words and len(w) > 3 and w not in words:
                 explanation.append(f"Spacing Evasion Detected: '{w}' (was spaced out)")
                 severity_boost += 0.07
         
+        # Deduplicate explanations (preserve order)
+        seen = set()
+        unique_explanation = []
+        for e in explanation:
+            if e not in seen:
+                seen.add(e)
+                unique_explanation.append(e)
+        explanation = unique_explanation
+
         # J. Multiple Trigger Escalation
         # If multiple different types of abuse are detected, escalate severity
         trigger_count = len(explanation)
-        if trigger_count >= 3:
+        if trigger_count >= 5:
+            explanation.append(f"Multiple Abuse Indicators: {trigger_count} triggers detected")
+            severity_boost += 0.15
+        elif trigger_count >= 3:
             explanation.append(f"Multiple Abuse Indicators: {trigger_count} triggers detected")
             severity_boost += 0.10
-        elif trigger_count >= 5:
-            severity_boost += 0.15
 
         # 3. Severity Scoring with Pattern Weights
         if explanation:

@@ -7,7 +7,6 @@ CyberShield is a comprehensive content moderation system designed to detect and 
 This repository contains the complete source code for the CyberShield platform, which consists of three main components:
 1. **Core Detection Engine**: A Flask-based backend API powered by a custom deep learning model (BERT + ResNet fusion) trained on the MMHS150K dataset.
 2. **Safe Compose Extension**: A Chrome extension that injects a real-time toxicity analysis overlay into Twitter/X.
-3. **Kid Shield Dashboard**: A web interface for monitoring youth account safety and analyzing interaction patterns.
 
 ## Features
 
@@ -23,11 +22,6 @@ The backend logic that powers the analysis.
 - **Multi-Modal Analysis**: Capable of processing both text and image data (architecture supports future image integration).
 - **Granular Classification**: Identifies specific types of toxicity including Racism, Sexism, Physical Threats, and Personal Attacks.
 - **Anti-Evasion**: Detects "leetspeak" and adversarial text modifications (e.g., using numbers for letters).
-
-### 3. Kid Shield
-A safety monitoring tool for parents and guardians.
-- **Safety Digest**: Aggregates a user's recent activity to provide a "Digital Wellbeing Score".
-- **Risk Breakdown**: Visualizes exposure to different types of harmful content.
 
 ## Installation Guide
 
@@ -90,8 +84,7 @@ The backend must be running for the extension and dashboard to function.
 
 ### Using the Dashboards
 1. Open your browser and go to `http://localhost:5000`.
-2. **Kid Shield**: Navigate to `/kid-shield`. Enter a Twitter handle (e.g., `@handle`) to generate a simulated safety report.
-3. **Live Demo**: Navigate to `/safe-compose` (or click "Safe Compose" in the nav) to test the detection engine without the extension.
+2. **Live Demo**: Navigate to `/safe-compose` (or click "Safe Compose" in the nav) to test the detection engine without the extension.
 
 ## API Reference
 
@@ -107,10 +100,6 @@ The backend exposes the following REST endpoints:
   - **Output**: JSON `{ "rewritten": "sanitized string", "new_score": 15 }`
   - **Description**: Generates a fast, non-toxic rewrite of the input text.
 
-- **POST /analyze-kid**
-  - **Input**: form-data `username`
-  - **Output**: JSON safety digest with wellbeing score and categorized tweet analysis.
-
 ## Project Structure
 
 - `app.py`: Main Flask application entry point.
@@ -119,7 +108,7 @@ The backend exposes the following REST endpoints:
   - `manifest.json`: Extension configuration (Manifest V3).
   - `content.js`: Script that injects the overlay into Twitter.
   - `background.js`: Service worker for API communication.
-- `templates/`: HTML files for the web dashboard (index, kid_shield, etc.).
+- `templates/`: HTML files for the web dashboard (index, features, etc.).
 - `static/`: CSS and assets for the web dashboard.
 - `requirements.txt`: Python dependency list.
 
