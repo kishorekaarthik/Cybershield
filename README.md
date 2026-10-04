@@ -5,7 +5,7 @@ CyberShield is a comprehensive content moderation system designed to detect and 
 ## Project Overview
 
 This repository contains the complete source code for the CyberShield platform, which consists of three main components:
-1. **Core Detection Engine**: A Flask-based backend API powered by a custom deep learning model (BERT + ResNet fusion) trained on the MMHS150K dataset.
+1. **Core Detection Engine**: A Flask-based backend API that scores text with a pretrained transformer toxicity classifier (`unitary/toxic-bert` by default), combined with a rule engine for explanations, threat/self-harm patterns and anti-evasion. A BERT + ResNet fusion architecture for MMHS150K training is included in `model_engine.py` but has no trained checkpoint yet and is not used for scoring.
 2. **Safe Compose Extension**: A Chrome extension that injects a real-time toxicity analysis overlay into Twitter/X.
 
 ## Features
@@ -60,6 +60,10 @@ The backend must be running for the extension and dashboard to function.
    ```
    You should see output indicating the server is running on `http://localhost:5000`.
 
+   On first start the toxicity classifier (about 400 MB) is downloaded from Hugging Face and cached. The startup log prints the active scoring engine, for example `Scoring engine: classifier:unitary/toxic-bert`. If the model cannot be loaded, the server falls back to `rules-only` keyword/pattern scoring and reports that in the `engine` field of every response.
+
+   To use a different classifier (a Hugging Face model id or a local directory), set `CYBERSHIELD_TEXT_MODEL` before starting the server. Set `CYBERSHIELD_MODEL_ACTIVATION=softmax` for single-label models; multi-label models such as toxic-bert use `sigmoid` (the default).
+
 ### Part 2: Extension Setup
 1. Open Google Chrome and navigate to `chrome://extensions/`.
 2. Toggle **Developer mode** in the top right corner.
@@ -92,7 +96,7 @@ The backend exposes the following REST endpoints:
 
 - **POST /analyze-live**
   - **Input**: JSON `{ "text": "user input string" }`
-  - **Output**: JSON containing `score` (0-100), `risk` (Safe/High), `label` (e.g., "Personal Attack"), and `zones` (evasion detection).
+  - **Output**: JSON containing `score` (0-100), `is_bullying`, `zone` (SAFE/UNCERTAIN/MODERATE/HIGH), `categories` (per-label classifier probabilities: toxic, severe_toxic, obscene, threat, insult, identity_hate), `explanation`, `triggers` (words to highlight) and `engine` (which scorer produced the result).
   - **Description**: Real-time analysis endpoint used by the Chrome Extension.
 
 - **POST /rewrite-empathy**
@@ -100,10 +104,26 @@ The backend exposes the following REST endpoints:
   - **Output**: JSON `{ "rewritten": "sanitized string", "new_score": 15 }`
   - **Description**: Generates a fast, non-toxic rewrite of the input text.
 
+## How Scoring Works
+
+1. The rule engine (`rule_based_analysis`) finds keyword and emoji triggers and high-precision patterns (direct threats, suicide encouragement). It also produces de-obfuscated variants of the text (leetspeak, repeated characters, spaced-out letters).
+2. The classifier scores the original text and each variant; the highest probability per label is kept, so `1d10t` is scored as `idiot`.
+3. The severity score is the highest toxic-label probability, raised to at least 0.90 for suicide encouragement and 0.80 for direct threats. Text scoring 0.60 or above is flagged.
+
+## Running Tests
+
+```bash
+pip install pytest
+python -m pytest tests
+```
+
+The tests use a stub classifier, so they do not download a model.
+
 ## Project Structure
 
 - `app.py`: Main Flask application entry point.
-- `model_engine.py`: Contains the `CyberBullyingModel` class and inference logic.
+- `model_engine.py`: Rule engine, `CyberShieldDetector` (inference used by the server) and the experimental `CyberBullyModel` fusion architecture and training loop.
+- `tests/`: Unit tests for the detector.
 - `chrome-extension/`: Source code for the browser extension.
   - `manifest.json`: Extension configuration (Manifest V3).
   - `content.js`: Script that injects the overlay into Twitter.

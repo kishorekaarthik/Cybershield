@@ -124,6 +124,303 @@ def custom_collate(batch):
 
 
 
+# ==========================================
+# RULE ENGINE (lexicons, patterns, obfuscation)
+# ==========================================
+# Lexicons - Comprehensive Offensive Terms (ENHANCED)
+OFFENSIVE_WORDS = {
+    # Profanity & Insults (with variants + misspellings + leetspeak)
+    'asshole', 'assholes', 'a$$hole', 'a$$holes', 'arsehole', 'arseholes',
+    'idiot', 'idiots', 'id10t', 'idoit', 'idiotic',
+    'stupid', 'stoopid', 'stpd', 'dumb', 'dum', 'dumbo',
+    'shit', 'shitty', 'sh1t', 'shyt', 'sht', 'crap', 'crappy',
+    'fuck', 'fucker', 'fuckers', 'fucking', 'fucked', 'fuk', 'fck', 'f**k', 'fuk', 'fking', 'fkn',
+    'bitch', 'bitches', 'bitching', 'b1tch', 'biatch', 'biotch', 'beotch',
+    'bastard', 'bastards', 'bstrd',
+    'cunt', 'cunts', 'c**t', 'kunt',
+    'dick', 'dicks', 'd1ck', 'dik', 'dickhead', 'dickheads',
+    'prick', 'pricks', 'pr1ck',
+    'pussy', 'pussies', 'pus$y',
+    'cock', 'cocks', 'c0ck',
+    'motherfucker', 'motherfuckers', 'mofo', 'mf', 'mfer',
+    'dipshit', 'dipshits', 'dipsh1t',
+    'dumbass', 'dumbasses', 'dumas', 'dumba$$',
+    'jackass', 'jackasses', 'jacka$$',
+    'moron', 'morons', 'm0r0n',
+    'imbecile', 'imbeciles',
+    'loser', 'losers', 'l0ser', 'looser', 'loosers',
+    'scum', 'scumbag', 'scumbags',
+    'filth', 'filthy',
+    'garbage', 'trash', 'trashy',
+    'worthless', 'pathetic', 'useless',
+    'twat', 'twats', 'wanker', 'wankers',
+    'slut', 'sluts', 'slutty', 'whore', 'whores',
+    'fag', 'fags', 'faggit',
+
+    # Slurs & Hate Speech (with variants)
+    'nigger', 'niggers', 'nigga', 'niggas', 'n1gger', 'n1gga',
+    'faggot', 'faggots', 'f@ggot', 'fag', 'fags',
+    'retard', 'retards', 'retarded', 'r3tard', 'tard',
+    'tranny', 'trannies', 'tr@nny',
+    'chink', 'chinks', 'ch1nk',
+    'spic', 'spics', 'sp1c',
+    'kike', 'kikes', 'k1ke',
+    'wetback', 'wetbacks',
+    'raghead', 'ragheads',
+    'towelhead', 'towelheads',
+    'gook', 'gooks', 'g00k',
+
+    # Violent/Threatening Terms (expanded)
+    'kill', 'killing', 'killed', 'killer', 'k1ll',
+    'die', 'dying', 'died', 'd1e',
+    'murder', 'murdering', 'murdered', 'murderer',
+    'rape', 'raping', 'raped', 'rapist', 'r@pe',
+    'assault', 'assaulting', 'assaulted',
+    'beat', 'beating', 'beaten',
+    'destroy', 'destroying', 'destroyed',
+    'stab', 'stabbing', 'stabbed',
+    'shoot', 'shooting', 'shot',
+    'hang', 'hanging', 'hanged',
+    'torture', 'torturing', 'tortured',
+
+    # Dehumanizing Terms (expanded)
+    'trash', 'circus', 'clown',
+    'animal', 'animals', 'beast', 'beasts',
+    'subhuman', 'inhuman',
+    'vermin', 'pest', 'pests',
+    'parasite', 'parasites',
+    'waste', 'wastoid',
+    'plague', 'disease',
+    'cancer', 'tumor',
+    'cockroach', 'cockroaches', 'rat', 'rats', 'pig', 'pigs',
+    'dog', 'dogs', 'mongrel', 'mongrels',
+
+    # Additional Insults
+    'creep', 'creepy', 'creeper',
+    'freak', 'freaks', 'freaky',
+    'weirdo', 'weirdos',
+    'psycho', 'psychos', 'psychopath',
+    'sicko', 'sickos',
+    'pervert', 'perverts', 'perv',
+    'degenerate', 'degenerates',
+    'screw', 'screwed', 'screwing',
+    'suck', 'sucks', 'sucking',
+    'hate', 'hated', 'hating', 'hater', 'haters'
+}
+HOSTILE_EMOJIS = {
+    '😡', '🤬', '👿', '😠', '🖕', '🤡', '🗑️', '💀', '🔪', '💣',
+    '💢', '👎', '🤮', '🤢', '😾', '🙄', '🖤', '💩', '☠️', '⚰️',
+    '🔫', '⚔️', '🗡️', '💥', '🧨', '👊', '🤛', '🤜'
+}
+
+
+def rule_based_analysis(text):
+    """
+    Lexicon/pattern analysis. Produces human-readable explanations, flags for
+    high-precision patterns (threats, suicide encouragement), and de-obfuscated
+    variants of the text so the classifier can score evasion attempts.
+    It does not decide the final score on its own when a classifier is loaded.
+    """
+    explanation = []
+    flags = set()
+    words = re.findall(r"\w+", text.lower())
+    text_lower = text.lower()
+
+    # 1. Triggers - Direct offensive words
+    for w in words:
+        if w in OFFENSIVE_WORDS: explanation.append(f"Keyword Trigger: '{w}'")
+    for e in HOSTILE_EMOJIS:
+        if e in text: explanation.append(f"Emoji Trigger: '{e}'")
+
+    # 2. Pattern-Based Detection - Multiple Abuse Categories
+    pattern_detected = False
+    severity_boost = 0.0
+
+    # A. Personal Attack Labels (racist, sexist, etc.) - ENHANCED
+    personal_attack_labels = [
+        'racist', 'sexist', 'homophobe', 'bigot', 'nazi', 
+        'fascist', 'transphobe', 'xenophobe', 'supremacist',
+        'misogynist', 'incel', 'creep', 'pervert', 'predator',
+        'scumbag', 'dirtbag', 'lowlife', 'degenerate'
+    ]
+
+    attack_patterns = [
+        r'\b(you|he|she|they|this guy|this girl|this person|u|ur)\s+(is|are|\'s|\'re|r)\s+(a|an|such a)?\s*(' + '|'.join(personal_attack_labels) + r')\b',
+        r'\b(' + '|'.join(personal_attack_labels) + r')\s+(piece of|scum|trash|filth|garbage)\b',
+        r'\b(fucking|damn|stupid)\s+(' + '|'.join(personal_attack_labels) + r')\b'
+    ]
+
+    for pattern in attack_patterns:
+        if re.search(pattern, text_lower):
+            explanation.append(f"Personal Attack Pattern: Labeling detected")
+            pattern_detected = True
+            severity_boost += 0.1
+            break
+
+    # B. Direct Threats - ENHANCED
+    threat_patterns = [
+        r'\b(kill|murder|beat|hurt|destroy|end|stab|shoot|hang|torture)\s+(you|yourself|him|her|them|u|urself)\b',
+        r'\b(you|he|she|u)\s+(should|deserve to|gonna|will|better|need to)\s+(die|suffer|burn|rot|perish|disappear)\b',
+        r'\bi\s+(will|gonna|\'ll|wanna|want to)\s+(kill|hurt|destroy|beat|find|get|end|murder)\s+(you|him|her|u)\b',
+        r'\b(watch your back|coming for you|you\'re dead|you\'re finished|i\'ll find you|see you soon)\b',
+        r'\b(hope you|wish you would)\s+(die|get hurt|suffer|burn|rot)\b',
+        r'\b(gonna|going to|will)\s+(beat|kick|punch|smash|destroy)\s+(your|ur)\s+(ass|face|head)\b'
+    ]
+
+    for pattern in threat_patterns:
+        if re.search(pattern, text_lower):
+            explanation.append(f"Threat Pattern: Direct threat detected")
+            flags.add("threat")
+            pattern_detected = True
+            severity_boost += 0.15  # Threats are more severe
+            break
+
+    # C. Suicide Encouragement (CRITICAL) - ENHANCED
+    suicide_patterns = [
+        r'\b(kill yourself|kys|k y s|end yourself|hang yourself)\b',
+        r'\b(world would be better without you|nobody would miss you|no one cares about you)\b',
+        r'\b(go die|just die|should die|need to die|deserve to die)\b',
+        r'\b(neck yourself|off yourself)\b'
+    ]
+
+    for pattern in suicide_patterns:
+        if re.search(pattern, text_lower):
+            explanation.append(f"CRITICAL: Suicide encouragement detected")
+            flags.add("suicide")
+            pattern_detected = True
+            severity_boost += 0.25  # Maximum severity
+            break
+
+    # D. Intensified Abuse (multiple insults/swears) - ENHANCED
+    insult_intensifiers = [
+        r'\b(fucking|damn|stupid|worthless|pathetic|useless)\s+(idiot|moron|loser|trash|scum|piece of shit|bastard|asshole)\b',
+        r'\b(piece of)\s+(shit|trash|garbage|filth|crap)\b',
+        r'\b(you\'re|he\'s|she\'s|ur|u r)\s+(so|such a|a total|a fucking)\s+(idiot|moron|loser|pathetic|stupid|dumb|worthless)\b',
+        r'\b(absolute|total|complete|utter)\s+(idiot|moron|trash|garbage|waste)\b',
+        r'\b(dumb|stupid)\s+(ass|fuck|shit|bitch)\b'
+    ]
+
+    for pattern in insult_intensifiers:
+        if re.search(pattern, text_lower):
+            explanation.append(f"Intensified Abuse: Compound insult detected")
+            pattern_detected = True
+            severity_boost += 0.08
+            break
+
+    # E. Dehumanizing Comparisons - ENHANCED
+    dehumanizing_patterns = [
+        r'\b(you|he|she|they|u)\s+(are|is|\'re|\'s|r)\s+(like )?(an? )?(animal|dog|pig|rat|vermin|parasite|cancer|plague|cockroach|beast|monkey|ape)\b',
+        r'\b(subhuman|less than human|not even human|inhuman)\b',
+        r'\b(act like|behave like|look like)\s+(an? )?(animal|dog|pig|monkey|ape)\b',
+        r'\b(you|he|she|they)\s+(belong in)\s+(a cage|the zoo|the trash|hell)\b'
+    ]
+
+    for pattern in dehumanizing_patterns:
+        if re.search(pattern, text_lower):
+            explanation.append(f"Dehumanizing Language: Comparison to non-human")
+            pattern_detected = True
+            severity_boost += 0.12
+            break
+
+    # F. Sexual Harassment - ENHANCED
+    sexual_harassment_patterns = [
+        r'\b(send nudes|show me|wanna see|dick pic|send pics|nude pics|show bobs)\b',
+        r'\b(sexy|hot|thicc)\s+(bitch|slut|whore|hoe)\b',
+        r'\b(suck my|eat my|blow me|lick my)\b',
+        r'\b(get on your knees|bend over|spread your)\b',
+        r'\b(slut|whore|hoe|thot)\b.*\b(you|ur|u r)\b'
+    ]
+
+    for pattern in sexual_harassment_patterns:
+        if re.search(pattern, text_lower):
+            explanation.append(f"Sexual Harassment: Inappropriate sexual content")
+            pattern_detected = True
+            severity_boost += 0.15
+            break
+
+    # G. Leetspeak & Character Substitution Detection
+    # Normalize common substitutions to catch evasion attempts
+    leetspeak_map = {
+        '@': 'a', '4': 'a', '3': 'e', '1': 'i', '!': 'i', '0': 'o', 
+        '$': 's', '5': 's', '7': 't', '+': 't', '8': 'b'
+    }
+    normalized_text = text_lower
+    for leet, normal in leetspeak_map.items():
+        normalized_text = normalized_text.replace(leet, normal)
+
+    # Check normalized text against offensive words
+    normalized_words = re.findall(r"\w+", normalized_text)
+    for w in normalized_words:
+        if w in OFFENSIVE_WORDS and w not in words:
+            explanation.append(f"Leetspeak Evasion Detected: '{w}' (original had substitutions)")
+            severity_boost += 0.06
+
+    # H. Repeated Character Detection (e.g., "assshole", "idiooot")
+    # Remove excessive repeated characters and check again
+    compressed_text = re.sub(r'(.)\1{2,}', r'\1', text_lower)
+    compressed_words = re.findall(r"\w+", compressed_text)
+    for w in compressed_words:
+        if w in OFFENSIVE_WORDS and w not in words:
+            explanation.append(f"Character Repetition Evasion: '{w}' detected")
+            severity_boost += 0.05
+
+    # I. Spaced-Out Word Detection (e.g., "a s s h o l e")
+    # Remove spaces between single characters
+    despaced_text = re.sub(r'\b(\w)\s+(?=\w\s|\w\b)', r'\1', text_lower)
+    despaced_words = re.findall(r"\w+", despaced_text)
+    for w in despaced_words:
+        if w in OFFENSIVE_WORDS and len(w) > 3 and w not in words:
+            explanation.append(f"Spacing Evasion Detected: '{w}' (was spaced out)")
+            severity_boost += 0.07
+
+    # Deduplicate explanations (preserve order)
+    seen = set()
+    unique_explanation = []
+    for e in explanation:
+        if e not in seen:
+            seen.add(e)
+            unique_explanation.append(e)
+    explanation = unique_explanation
+
+    # J. Multiple Trigger Escalation
+    # If multiple different types of abuse are detected, escalate severity
+    trigger_count = len(explanation)
+    if trigger_count >= 5:
+        explanation.append(f"Multiple Abuse Indicators: {trigger_count} triggers detected")
+        severity_boost += 0.15
+    elif trigger_count >= 3:
+        explanation.append(f"Multiple Abuse Indicators: {trigger_count} triggers detected")
+        severity_boost += 0.10
+
+    # 3. Severity Scoring with Pattern Weights
+    if explanation:
+        # Base score from triggers
+        base_score = 0.70 + (len(explanation) * 0.04)
+        # Add pattern-specific severity boosts
+        prob_sim = min(base_score + severity_boost, 0.99)
+    else:
+        prob_sim = 0.15
+
+    # 4. Contextual Refinement (Sarcasm)
+    if "genius" in text_lower and ("trash" in text_lower or "🤡" in text):
+        explanation.append("Contextual Refinement: Sarcasm Detected")
+        prob_sim = 0.95
+
+    # De-obfuscated variants that differ from the input (scored by the classifier)
+    variants = []
+    for v in (normalized_text, compressed_text, despaced_text):
+        if v != text_lower and v not in variants:
+            variants.append(v)
+
+    return {
+        "explanation": explanation,
+        "flags": flags,
+        "variants": variants,
+        "rule_score": prob_sim,
+    }
+
+
+
 class AdapterLayer(nn.Module):
     def __init__(self, hidden_dim, adapter_dim=64):
         super().__init__()
@@ -171,91 +468,6 @@ class CyberBullyModel(nn.Module):
         self.class_head = nn.Linear(768, num_classes)
         self.agg_head = nn.Linear(768, 1)
 
-        # Lexicons - Comprehensive Offensive Terms (ENHANCED)
-        self._offensive_words = {
-            # Profanity & Insults (with variants + misspellings + leetspeak)
-            'asshole', 'assholes', 'a$$hole', 'a$$holes', 'arsehole', 'arseholes',
-            'idiot', 'idiots', 'id10t', 'idoit', 'idiotic',
-            'stupid', 'stoopid', 'stpd', 'dumb', 'dum', 'dumbo',
-            'shit', 'shitty', 'sh1t', 'shyt', 'sht', 'crap', 'crappy',
-            'fuck', 'fucker', 'fuckers', 'fucking', 'fucked', 'fuk', 'fck', 'f**k', 'fuk', 'fking', 'fkn',
-            'bitch', 'bitches', 'bitching', 'b1tch', 'biatch', 'biotch', 'beotch',
-            'bastard', 'bastards', 'bstrd',
-            'cunt', 'cunts', 'c**t', 'kunt',
-            'dick', 'dicks', 'd1ck', 'dik', 'dickhead', 'dickheads',
-            'prick', 'pricks', 'pr1ck',
-            'pussy', 'pussies', 'pus$y',
-            'cock', 'cocks', 'c0ck',
-            'motherfucker', 'motherfuckers', 'mofo', 'mf', 'mfer',
-            'dipshit', 'dipshits', 'dipsh1t',
-            'dumbass', 'dumbasses', 'dumas', 'dumba$$',
-            'jackass', 'jackasses', 'jacka$$',
-            'moron', 'morons', 'm0r0n',
-            'imbecile', 'imbeciles',
-            'loser', 'losers', 'l0ser', 'looser', 'loosers',
-            'scum', 'scumbag', 'scumbags',
-            'filth', 'filthy',
-            'garbage', 'trash', 'trashy',
-            'worthless', 'pathetic', 'useless',
-            'twat', 'twats', 'wanker', 'wankers',
-            'slut', 'sluts', 'slutty', 'whore', 'whores',
-            'fag', 'fags', 'faggit',
-            
-            # Slurs & Hate Speech (with variants)
-            'nigger', 'niggers', 'nigga', 'niggas', 'n1gger', 'n1gga',
-            'faggot', 'faggots', 'f@ggot', 'fag', 'fags',
-            'retard', 'retards', 'retarded', 'r3tard', 'tard',
-            'tranny', 'trannies', 'tr@nny',
-            'chink', 'chinks', 'ch1nk',
-            'spic', 'spics', 'sp1c',
-            'kike', 'kikes', 'k1ke',
-            'wetback', 'wetbacks',
-            'raghead', 'ragheads',
-            'towelhead', 'towelheads',
-            'gook', 'gooks', 'g00k',
-            
-            # Violent/Threatening Terms (expanded)
-            'kill', 'killing', 'killed', 'killer', 'k1ll',
-            'die', 'dying', 'died', 'd1e',
-            'murder', 'murdering', 'murdered', 'murderer',
-            'rape', 'raping', 'raped', 'rapist', 'r@pe',
-            'assault', 'assaulting', 'assaulted',
-            'beat', 'beating', 'beaten',
-            'destroy', 'destroying', 'destroyed',
-            'stab', 'stabbing', 'stabbed',
-            'shoot', 'shooting', 'shot',
-            'hang', 'hanging', 'hanged',
-            'torture', 'torturing', 'tortured',
-            
-            # Dehumanizing Terms (expanded)
-            'trash', 'circus', 'clown',
-            'animal', 'animals', 'beast', 'beasts',
-            'subhuman', 'inhuman',
-            'vermin', 'pest', 'pests',
-            'parasite', 'parasites',
-            'waste', 'wastoid',
-            'plague', 'disease',
-            'cancer', 'tumor',
-            'cockroach', 'cockroaches', 'rat', 'rats', 'pig', 'pigs',
-            'dog', 'dogs', 'mongrel', 'mongrels',
-            
-            # Additional Insults
-            'creep', 'creepy', 'creeper',
-            'freak', 'freaks', 'freaky',
-            'weirdo', 'weirdos',
-            'psycho', 'psychos', 'psychopath',
-            'sicko', 'sickos',
-            'pervert', 'perverts', 'perv',
-            'degenerate', 'degenerates',
-            'screw', 'screwed', 'screwing',
-            'suck', 'sucks', 'sucking',
-            'hate', 'hated', 'hating', 'hater', 'haters'
-        }
-        self._hostile_emojis = {
-            '😡', '🤬', '👿', '😠', '🖕', '🤡', '🗑️', '💀', '🔪', '💣',
-            '💢', '👎', '🤮', '🤢', '😾', '🙄', '🖤', '💩', '☠️', '⚰️',
-            '🔫', '⚔️', '🗡️', '💥', '🧨', '👊', '🤛', '🤜'
-        }
         self.to(self.device)
 
     def forward(self, batch):
@@ -300,201 +512,126 @@ class CyberBullyModel(nn.Module):
 
         return logits, agg_score
 
+
+# ==========================================
+# INFERENCE: PRETRAINED TOXICITY CLASSIFIER + RULES
+# ==========================================
+# The fusion model above has no trained checkpoint, so inference uses a
+# pretrained toxicity classifier. Override with CYBERSHIELD_TEXT_MODEL
+# (a Hugging Face model id or a local directory).
+DEFAULT_TEXT_MODEL = "unitary/toxic-bert"
+BULLYING_THRESHOLD = 0.6
+
+# Labels that mean "not toxic" in common toxicity classifiers
+SAFE_LABELS = {"non-toxic", "non_toxic", "not_toxic", "non-offensive", "not-offensive",
+               "not_offensive", "neutral", "normal", "safe", "label_0"}
+
+# High-precision patterns put a floor under the classifier score
+PATTERN_FLOORS = {"suicide": 0.90, "threat": 0.80}
+
+
+class ToxicityClassifier:
+    """Wraps a Hugging Face sequence classifier and returns per-label probabilities."""
+
+    def __init__(self, model_name, device):
+        from transformers import AutoModelForSequenceClassification
+        self.device = device
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name).to(device).eval()
+        config = self.model.config
+        self.labels = [config.id2label[i] for i in range(config.num_labels)]
+        # Jigsaw-style models (e.g. toxic-bert) are multi-label -> sigmoid
+        activation = os.environ.get("CYBERSHIELD_MODEL_ACTIVATION")
+        if activation is None:
+            activation = "softmax" if config.problem_type == "single_label_classification" else "sigmoid"
+        self.activation = activation
+
+    @torch.no_grad()
+    def predict(self, texts: List[str], batch_size: int = 32) -> List[Dict[str, float]]:
+        out = []
+        for i in range(0, len(texts), batch_size):
+            enc = self.tokenizer(texts[i:i + batch_size], truncation=True, max_length=256,
+                                 padding=True, return_tensors="pt").to(self.device)
+            logits = self.model(**enc).logits
+            probs = torch.softmax(logits, dim=-1) if self.activation == "softmax" else torch.sigmoid(logits)
+            for row in probs.cpu().tolist():
+                out.append(dict(zip(self.labels, row)))
+        return out
+
+
+class CyberShieldDetector:
+    """
+    Production inference entry point.
+    Score = classifier toxicity (max over the text and its de-obfuscated variants),
+    raised to a floor when a high-precision threat/suicide pattern matches.
+    Falls back to the rule engine alone if the classifier cannot be loaded.
+    """
+
+    def __init__(self, device=None, model_name=None, classifier=None):
+        self.device = device or torch.device("cpu")
+        model_name = model_name or os.environ.get("CYBERSHIELD_TEXT_MODEL", DEFAULT_TEXT_MODEL)
+        if classifier is not None:
+            self.classifier = classifier
+            self.engine = f"classifier:{model_name}"
+            return
+        try:
+            self.classifier = ToxicityClassifier(model_name, self.device)
+            self.engine = f"classifier:{model_name}"
+        except Exception as e:
+            print(f"WARNING: could not load toxicity classifier '{model_name}': {e}")
+            print("WARNING: falling back to rules-only scoring (keyword/pattern heuristics).")
+            self.classifier = None
+            self.engine = "rules-only"
+
     def predict_and_explain(self, text, images=None):
-        """Operational Transparency Module"""
-        explanation = []
-        words = re.findall(r"\w+", text.lower())
-        text_lower = text.lower()
+        return self.predict_batch([text])[0]
 
-        # 1. Triggers - Direct offensive words
-        for w in words:
-            if w in self._offensive_words: explanation.append(f"Keyword Trigger: '{w}'")
-        for e in self._hostile_emojis:
-            if e in text: explanation.append(f"Emoji Trigger: '{e}'")
+    def predict_batch(self, texts: List[str]) -> List[Dict[str, Any]]:
+        rules = [rule_based_analysis(t) for t in texts]
+        if self.classifier is None:
+            return [self._combine(r, None) for r in rules]
 
-        # 2. Pattern-Based Detection - Multiple Abuse Categories
-        pattern_detected = False
-        severity_boost = 0.0
-        
-        # A. Personal Attack Labels (racist, sexist, etc.) - ENHANCED
-        personal_attack_labels = [
-            'racist', 'sexist', 'homophobe', 'bigot', 'nazi', 
-            'fascist', 'transphobe', 'xenophobe', 'supremacist',
-            'misogynist', 'incel', 'creep', 'pervert', 'predator',
-            'scumbag', 'dirtbag', 'lowlife', 'degenerate'
-        ]
-        
-        attack_patterns = [
-            r'\b(you|he|she|they|this guy|this girl|this person|u|ur)\s+(is|are|\'s|\'re|r)\s+(a|an|such a)?\s*(' + '|'.join(personal_attack_labels) + r')\b',
-            r'\b(' + '|'.join(personal_attack_labels) + r')\s+(piece of|scum|trash|filth|garbage)\b',
-            r'\b(fucking|damn|stupid)\s+(' + '|'.join(personal_attack_labels) + r')\b'
-        ]
-        
-        for pattern in attack_patterns:
-            if re.search(pattern, text_lower):
-                explanation.append(f"Personal Attack Pattern: Labeling detected")
-                pattern_detected = True
-                severity_boost += 0.1
-                break
-        
-        # B. Direct Threats - ENHANCED
-        threat_patterns = [
-            r'\b(kill|murder|beat|hurt|destroy|end|stab|shoot|hang|torture)\s+(you|yourself|him|her|them|u|urself)\b',
-            r'\b(you|he|she|u)\s+(should|deserve to|gonna|will|better|need to)\s+(die|suffer|burn|rot|perish|disappear)\b',
-            r'\bi\s+(will|gonna|\'ll|wanna|want to)\s+(kill|hurt|destroy|beat|find|get|end|murder)\s+(you|him|her|u)\b',
-            r'\b(watch your back|coming for you|you\'re dead|you\'re finished|i\'ll find you|see you soon)\b',
-            r'\b(hope you|wish you would)\s+(die|get hurt|suffer|burn|rot)\b',
-            r'\b(gonna|going to|will)\s+(beat|kick|punch|smash|destroy)\s+(your|ur)\s+(ass|face|head)\b'
-        ]
-        
-        for pattern in threat_patterns:
-            if re.search(pattern, text_lower):
-                explanation.append(f"Threat Pattern: Direct threat detected")
-                pattern_detected = True
-                severity_boost += 0.15  # Threats are more severe
-                break
-        
-        # C. Suicide Encouragement (CRITICAL) - ENHANCED
-        suicide_patterns = [
-            r'\b(kill yourself|kys|k y s|end yourself|do it|jump off|hang yourself)\b',
-            r'\b(world would be better without you|nobody would miss you|no one cares about you)\b',
-            r'\b(go die|just die|should die|need to die|deserve to die)\b',
-            r'\b(end it|finish it|do us all a favor)\b',
-            r'\b(neck yourself|off yourself)\b'
-        ]
-        
-        for pattern in suicide_patterns:
-            if re.search(pattern, text_lower):
-                explanation.append(f"CRITICAL: Suicide encouragement detected")
-                pattern_detected = True
-                severity_boost += 0.25  # Maximum severity
-                break
-        
-        # D. Intensified Abuse (multiple insults/swears) - ENHANCED
-        insult_intensifiers = [
-            r'\b(fucking|damn|stupid|worthless|pathetic|useless)\s+(idiot|moron|loser|trash|scum|piece of shit|bastard|asshole)\b',
-            r'\b(piece of)\s+(shit|trash|garbage|filth|crap)\b',
-            r'\b(you\'re|he\'s|she\'s|ur|u r)\s+(so|such a|a total|a fucking)\s+(idiot|moron|loser|pathetic|stupid|dumb|worthless)\b',
-            r'\b(absolute|total|complete|utter)\s+(idiot|moron|trash|garbage|waste)\b',
-            r'\b(dumb|stupid)\s+(ass|fuck|shit|bitch)\b'
-        ]
-        
-        for pattern in insult_intensifiers:
-            if re.search(pattern, text_lower):
-                explanation.append(f"Intensified Abuse: Compound insult detected")
-                pattern_detected = True
-                severity_boost += 0.08
-                break
-        
-        # E. Dehumanizing Comparisons - ENHANCED
-        dehumanizing_patterns = [
-            r'\b(you|he|she|they|u)\s+(are|is|\'re|\'s|r)\s+(like )?(an? )?(animal|dog|pig|rat|vermin|parasite|cancer|plague|cockroach|beast|monkey|ape)\b',
-            r'\b(subhuman|less than human|not even human|inhuman)\b',
-            r'\b(act like|behave like|look like)\s+(an? )?(animal|dog|pig|monkey|ape)\b',
-            r'\b(you|he|she|they)\s+(belong in)\s+(a cage|the zoo|the trash|hell)\b'
-        ]
-        
-        for pattern in dehumanizing_patterns:
-            if re.search(pattern, text_lower):
-                explanation.append(f"Dehumanizing Language: Comparison to non-human")
-                pattern_detected = True
-                severity_boost += 0.12
-                break
-        
-        # F. Sexual Harassment - ENHANCED
-        sexual_harassment_patterns = [
-            r'\b(send nudes|show me|wanna see|dick pic|send pics|nude pics|show bobs)\b',
-            r'\b(sexy|hot|thicc)\s+(bitch|slut|whore|hoe)\b',
-            r'\b(suck my|eat my|blow me|lick my)\b',
-            r'\b(get on your knees|bend over|spread your)\b',
-            r'\b(slut|whore|hoe|thot)\b.*\b(you|ur|u r)\b'
-        ]
-        
-        for pattern in sexual_harassment_patterns:
-            if re.search(pattern, text_lower):
-                explanation.append(f"Sexual Harassment: Inappropriate sexual content")
-                pattern_detected = True
-                severity_boost += 0.15
-                break
+        # Score each text together with its de-obfuscated variants in one pass
+        flat, owner = [], []
+        for i, (t, r) in enumerate(zip(texts, rules)):
+            for v in [t] + r["variants"]:
+                flat.append(v)
+                owner.append(i)
+        preds = self.classifier.predict(flat)
 
-        # G. Leetspeak & Character Substitution Detection
-        # Normalize common substitutions to catch evasion attempts
-        leetspeak_map = {
-            '@': 'a', '4': 'a', '3': 'e', '1': 'i', '!': 'i', '0': 'o', 
-            '$': 's', '5': 's', '7': 't', '+': 't', '8': 'b'
-        }
-        normalized_text = text_lower
-        for leet, normal in leetspeak_map.items():
-            normalized_text = normalized_text.replace(leet, normal)
-        
-        # Check normalized text against offensive words
-        normalized_words = re.findall(r"\w+", normalized_text)
-        for w in normalized_words:
-            if w in self._offensive_words and w not in words:
-                explanation.append(f"Leetspeak Evasion Detected: '{w}' (original had substitutions)")
-                severity_boost += 0.06
-        
-        # H. Repeated Character Detection (e.g., "assshole", "idiooot")
-        # Remove excessive repeated characters and check again
-        compressed_text = re.sub(r'(.)\1{2,}', r'\1', text_lower)
-        compressed_words = re.findall(r"\w+", compressed_text)
-        for w in compressed_words:
-            if w in self._offensive_words and w not in words:
-                explanation.append(f"Character Repetition Evasion: '{w}' detected")
-                severity_boost += 0.05
-        
-        # I. Spaced-Out Word Detection (e.g., "a s s h o l e")
-        # Remove spaces between single characters
-        despaced_text = re.sub(r'\b(\w)\s+(?=\w\s|\w\b)', r'\1', text_lower)
-        despaced_words = re.findall(r"\w+", despaced_text)
-        for w in despaced_words:
-            if w in self._offensive_words and len(w) > 3 and w not in words:
-                explanation.append(f"Spacing Evasion Detected: '{w}' (was spaced out)")
-                severity_boost += 0.07
-        
-        # Deduplicate explanations (preserve order)
-        seen = set()
-        unique_explanation = []
-        for e in explanation:
-            if e not in seen:
-                seen.add(e)
-                unique_explanation.append(e)
-        explanation = unique_explanation
+        label_probs = [None] * len(texts)
+        for i, p in zip(owner, preds):
+            if label_probs[i] is None:
+                label_probs[i] = dict(p)
+            else:
+                label_probs[i] = {k: max(v, p[k]) for k, v in label_probs[i].items()}
+        return [self._combine(r, lp) for r, lp in zip(rules, label_probs)]
 
-        # J. Multiple Trigger Escalation
-        # If multiple different types of abuse are detected, escalate severity
-        trigger_count = len(explanation)
-        if trigger_count >= 5:
-            explanation.append(f"Multiple Abuse Indicators: {trigger_count} triggers detected")
-            severity_boost += 0.15
-        elif trigger_count >= 3:
-            explanation.append(f"Multiple Abuse Indicators: {trigger_count} triggers detected")
-            severity_boost += 0.10
-
-        # 3. Severity Scoring with Pattern Weights
-        if explanation:
-            # Base score from triggers
-            base_score = 0.70 + (len(explanation) * 0.04)
-            # Add pattern-specific severity boosts
-            prob_sim = min(base_score + severity_boost, 0.99)
+    def _combine(self, rule, label_probs):
+        explanation = list(rule["explanation"])
+        if label_probs is None:
+            score = rule["rule_score"]
+            categories = {}
         else:
-            prob_sim = 0.15
+            toxic = {k: v for k, v in label_probs.items() if k.lower() not in SAFE_LABELS}
+            score = max(toxic.values()) if toxic else 0.0
+            for flag in rule["flags"]:
+                score = max(score, PATTERN_FLOORS.get(flag, 0.0))
+            categories = {k: round(v, 4) for k, v in toxic.items()}
+            model_lines = [f"Model: {k.replace('_', ' ')} ({v:.0%})"
+                           for k, v in sorted(toxic.items(), key=lambda kv: -kv[1]) if v >= 0.5]
+            explanation = model_lines + explanation
 
-        # 4. Contextual Refinement (Sarcasm)
-        if "genius" in text_lower and ("trash" in text_lower or "🤡" in text):
-            explanation.append("Contextual Refinement: Sarcasm Detected")
-            prob_sim = 0.95
-
-        # 5. Mitigation Rule (< 0.6)
-        is_bullying = (prob_sim > 0.6)
-        if not explanation and prob_sim < 0.6:
-            is_bullying = False
-            explanation.append("Safe: Low confidence & no triggers.")
+        is_bullying = score >= BULLYING_THRESHOLD
+        if not explanation:
+            explanation.append("Safe: No harmful patterns detected.")
 
         return {
-            "is_bullying": is_bullying,
-            "severity_score": prob_sim,
-            "explanation": explanation
+            "is_bullying": bool(is_bullying),
+            "severity_score": float(score),
+            "explanation": explanation,
+            "categories": categories,
+            "engine": self.engine,
         }
 
 
@@ -583,7 +720,8 @@ if __name__ == "__main__":
     # 3. Complex Stress Test
     print("\n🧪 STARTING COMPLEX STRESS TEST")
     complex_text = "Wow, absolute genius. 🧠 Thought you could get away? Go back to the circus. 🤡 🗑️"
-    res = model.predict_and_explain(complex_text)
+    detector = CyberShieldDetector(device=DEVICE)
+    res = detector.predict_and_explain(complex_text)
     print(f"Input: {complex_text}")
     print(f"Result: {'🔴 FLAGGED' if res['is_bullying'] else '🟢 SAFE'} (Score: {res['severity_score']:.2f})")
     print(f"Explanation: {res['explanation']}")
@@ -598,4 +736,4 @@ if __name__ == "__main__":
             {"id": "2", "text": "Have a nice day! ❤️"},
             {"id": "3", "text": "Go kill yourself trash."}
         ]
-    run_detection_on_tweets(model, tweets, "moderation_report.csv")
+    run_detection_on_tweets(detector, tweets, "moderation_report.csv")

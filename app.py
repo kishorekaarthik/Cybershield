@@ -8,7 +8,7 @@ import torch
 # -------------------------------------------------
 # IMPORT YOUR MODEL CODE (UNCHANGED)
 # -------------------------------------------------
-from model_engine import CyberBullyModel, fetch_user_tweets
+from model_engine import CyberShieldDetector, fetch_user_tweets
 
 # -------------------------------------------------
 # FLASK APP
@@ -22,8 +22,8 @@ CORS(app)  # Enable CORS for Chrome extension
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"✅ Loading CyberShield model on {DEVICE}")
 
-model = CyberBullyModel(device=DEVICE)
-model.eval()
+model = CyberShieldDetector(device=DEVICE)
+print(f"Scoring engine: {model.engine}")
 
 # -------------------------------------------------
 # DECISION ZONES (UNCERTAINTY-AWARE)
@@ -112,8 +112,8 @@ def analyze():
     results = []
     scores = []
 
-    for t in tweets:
-        res = model.predict_and_explain(t["text"])
+    preds = model.predict_batch([t["text"] for t in tweets])
+    for t, res in zip(tweets, preds):
         scores.append(res["severity_score"])
 
         results.append({
@@ -136,6 +136,7 @@ def analyze():
         "risk_score": avg_score_pct,
         "risk_zone": zone,
         "policy": policy,
+        "engine": model.engine,
         "tweets": results
     })
 
@@ -164,8 +165,8 @@ def analyze_ring():
     all_triggers = []
     all_emojis = []
 
-    for i, t in enumerate(tweets):
-        res = model.predict_and_explain(t["text"])
+    preds = model.predict_batch([t["text"] for t in tweets])
+    for i, (t, res) in enumerate(zip(tweets, preds)):
         source = fake_accounts[i % len(fake_accounts)]
 
         # Extract trigger words from explanation
@@ -280,7 +281,9 @@ def analyze_live():
         "is_bullying": res["is_bullying"],
         "explanation": res["explanation"],
         "triggers": list(set(triggers)),
-        "zone": risk_zone(res["severity_score"])
+        "zone": risk_zone(res["severity_score"]),
+        "categories": res["categories"],
+        "engine": res["engine"]
     })
 
 # -------------------------------------------------
